@@ -59,11 +59,12 @@ type Language = 'en' | 'ar';
 type ViewMode = 'landing' | 'login' | 'admin';
 type AdminTab = 'leads' | 'media';
 type LeadStatus = 'new' | 'contacted' | 'booked' | 'archived';
+type SpecialtyCategory = 'dental' | 'hair' | 'plastic' | 'spine';
 
 interface DentalCase {
   id: string;
   src: string;
-  category: 'hollywood' | 'cosmetic';
+  category: SpecialtyCategory;
   titleEn: string;
   titleAr: string;
   tagEn: string;
@@ -84,6 +85,7 @@ interface ConsultationLead {
   email: string;
   serviceValue: string;
   timeline?: string;
+  arrivalDate?: string;
   message: string;
   status: LeadStatus;
   adminNotes: string;
@@ -93,11 +95,13 @@ interface ConsultationLead {
 
 const WHATSAPP_DISPLAY = '+90 544 455 5513';
 const WHATSAPP_RAW = '905444555513';
+const INSTAGRAM_URL = 'https://www.instagram.com/esteluxclinic/';
+const FACEBOOK_URL = 'https://www.facebook.com/clinicestelux';
 const ENV_ADMIN_PIN = (import.meta.env.VITE_ADMIN_PIN || '').trim();
 
 const STORAGE_KEYS = {
   leads: 'estelux_consultation_leads_v1',
-  cases: 'estelux_dental_cases_v4',
+  cases: 'estelux_clinical_cases_v5',
   logo: 'estelux_brand_logo_v4',
   heroPhoto: 'estelux_hero_photo_v4',
   adminPin: 'estelux_admin_pin_v1',
@@ -106,12 +110,35 @@ const STORAGE_KEYS = {
 
 const DEFAULT_ASSETS = {
   logo: '/estelux-logo.png',
-  case1: '/case-hollywood-2.jpg',
-  case2: '/case-cosmetic-1.jpg',
-  case3: '/case-hollywood-1.jpg',
-  case4: '/case-cosmetic-2.jpg',
-  case5: '/case-cosmetic-3.jpg',
-  heroDental: '/case-hollywood-2.jpg',
+  case1: '/case-dental-hollywood.webp',
+  case2: '/case-dental-cosmetic-1.webp',
+  case3: '/case-dental-cosmetic-2.webp',
+  case4: '/case-hair-1.webp',
+  case5: '/case-hair-2.webp',
+  case6: '/case-hair-3.webp',
+  case7: '/case-plastic-body.webp',
+  case8: '/case-plastic-facelift.webp',
+  case9: '/case-spine-scoliosis.webp',
+  heroDental: '/client-logo.webp',
+};
+
+const CATEGORY_META: Record<SpecialtyCategory, { tagEn: string; tagAr: string }> = {
+  dental: {
+    tagEn: 'Dental Surgery & Cosmetic Dentistry',
+    tagAr: 'جراحة الأسنان وتجميلها',
+  },
+  hair: {
+    tagEn: 'Hair Transplantation',
+    tagAr: 'زراعة الشعر',
+  },
+  plastic: {
+    tagEn: 'Plastic & Aesthetic Surgery',
+    tagAr: 'جراحات التجميل',
+  },
+  spine: {
+    tagEn: 'Spine Surgery & Spinal Disorders Treatment',
+    tagAr: 'جراحة العمود الفقري وعلاج أمراضه',
+  },
 };
 
 const BROKEN_LEGACY_FILES = new Set([
@@ -125,73 +152,111 @@ const BROKEN_LEGACY_FILES = new Set([
 
 const INITIAL_CASES: DentalCase[] = [
   {
-    id: 'case-1',
+    id: 'case-dental-1',
     src: DEFAULT_ASSETS.case1,
-    category: 'hollywood',
-    titleEn: 'Hollywood Smile — Natural Arch Restoration',
-    titleAr: 'هوليوود سمايل — تجميل وتناسق الابتسامة الطبيعي',
-    tagEn: 'Hollywood Smile',
-    tagAr: 'هوليوود سمايل',
-    captionEn: 'Seamless replacement of missing upper incisor and full smile design with E-Max® porcelain veneers.',
-    captionAr: 'تعويض السن الأمامي المفقود وتصميم ابتسامة متكاملة بعدسات الإيماكس الخزفية.',
-    specsEn: '5 Days • Ivoclar E-Max®',
-    specsAr: '٥ أيام • إيماكس ألماني',
+    category: 'dental',
+    titleEn: 'Hollywood Smile',
+    titleAr: 'هوليوود سمايل',
+    tagEn: CATEGORY_META.dental.tagEn,
+    tagAr: CATEGORY_META.dental.tagAr,
+    captionEn: 'Before and after photos: Hollywood Smile',
+    captionAr: 'صور قبل وبعد: هوليوود سمايل',
     visible: true,
   },
   {
-    id: 'case-2',
+    id: 'case-dental-2',
     src: DEFAULT_ASSETS.case2,
-    category: 'cosmetic',
-    titleEn: 'Full-Mouth Cosmetic Dentistry Makeover',
-    titleAr: 'علاج الأسنان وتجميلها — تأهيل شامل للفكين',
-    tagEn: 'Cosmetic Dentistry',
-    tagAr: 'علاج الأسنان وتجميلها',
-    captionEn: 'Complete functional and aesthetic transformation of worn dentition using multilayer German zirconia crowns.',
-    captionAr: 'إعادة تأهيل شاملة للأسنان المتآكلة واستعادة البياض الطبيعي بتيجان الزيركون الألماني.',
-    specsEn: '6 Days • Multilayer Zirconia',
-    specsAr: '٦ أيام • زيركون متعدد الطبقات',
+    category: 'dental',
+    titleEn: 'Cosmetic dentistry case 1',
+    titleAr: 'الحالة الأولى لتجميل الأسنان',
+    tagEn: CATEGORY_META.dental.tagEn,
+    tagAr: CATEGORY_META.dental.tagAr,
+    captionEn: 'Before and after photos: Cosmetic dentistry case 1',
+    captionAr: 'صور قبل وبعد: الحالة الأولى لتجميل الأسنان',
     visible: true,
   },
   {
-    id: 'case-3',
+    id: 'case-dental-3',
     src: DEFAULT_ASSETS.case3,
-    category: 'hollywood',
-    titleEn: 'Hollywood Smile — Full Bite & Shade Alignment',
-    titleAr: 'هوليوود سمايل — إعادة بناء الإطباق وتناغم اللون',
-    tagEn: 'Hollywood Smile',
-    tagAr: 'هوليوود سمايل',
-    captionEn: 'Precision digital smile reconstruction correcting missing tooth gap, bite alignment, and enamel radiance.',
-    captionAr: 'تصميم رقمي متكامل لتعويض الفراغ الأمامي وتصحيح الإطباق بلون طبيعي مشرق.',
-    specsEn: '5 Days • 3D Digital Smile Design',
-    specsAr: '٥ أيام • تصميم رقمي ثلاثي الأبعاد',
+    category: 'dental',
+    titleEn: 'Cosmetic dentistry case 2',
+    titleAr: 'الحالة الثانية لتجميل الأسنان',
+    tagEn: CATEGORY_META.dental.tagEn,
+    tagAr: CATEGORY_META.dental.tagAr,
+    captionEn: 'Before and after photos: Cosmetic dentistry case 2',
+    captionAr: 'صور قبل وبعد: الحالة الثانية لتجميل الأسنان',
     visible: true,
   },
   {
-    id: 'case-4',
+    id: 'case-hair-1',
     src: DEFAULT_ASSETS.case4,
-    category: 'cosmetic',
-    titleEn: 'Complete Upper & Lower Arch Rehabilitation',
-    titleAr: 'علاج الأسنان وتجميلها — تعويض وتجميل كامل',
-    tagEn: 'Cosmetic Dentistry',
-    tagAr: 'علاج الأسنان وتجميلها',
-    captionEn: 'Restoring missing upper teeth and severe attrition into a balanced, confident, and healthy smile.',
-    captionAr: 'تعويض الأسنان المفقودة والمتآكلة واستعادة الابتسامة الصحية والجمالية بالكامل.',
-    specsEn: '10-Year Written Warranty',
-    specsAr: 'ضمان دولي مكتوب ١٠ سنوات',
+    category: 'hair',
+    titleEn: 'Hair transplant case 1',
+    titleAr: 'الحالة الأولى لزراعة الشعر',
+    tagEn: CATEGORY_META.hair.tagEn,
+    tagAr: CATEGORY_META.hair.tagAr,
+    captionEn: 'Before and after photos: Hair transplant case 1',
+    captionAr: 'صور قبل وبعد: الحالة الأولى لزراعة الشعر',
     visible: true,
   },
   {
-    id: 'case-5',
+    id: 'case-hair-2',
     src: DEFAULT_ASSETS.case5,
-    category: 'cosmetic',
-    titleEn: 'Aesthetic Smile Reconstruction',
-    titleAr: 'ترميم وتجميل الابتسامة المتقدم',
-    tagEn: 'Cosmetic Dentistry',
-    tagAr: 'علاج الأسنان وتجميلها',
-    captionEn: 'High-translucency aesthetic crowns crafted for natural gum harmony and facial balance in Istanbul.',
-    captionAr: 'تيجان خزفية عالية الشفافية مصممة لتتناغم مع اللثة وملامح الوجه في إسطنبول.',
-    specsEn: '6 Days • Istanbul Clinic',
-    specsAr: '٦ أيام • عيادة إسطنبول',
+    category: 'hair',
+    titleEn: 'Hair transplant case 2',
+    titleAr: 'الحالة الثانية لزراعة الشعر',
+    tagEn: CATEGORY_META.hair.tagEn,
+    tagAr: CATEGORY_META.hair.tagAr,
+    captionEn: 'Before and after photos: Hair transplant case 2',
+    captionAr: 'صور قبل وبعد: الحالة الثانية لزراعة الشعر',
+    visible: true,
+  },
+  {
+    id: 'case-hair-3',
+    src: DEFAULT_ASSETS.case6,
+    category: 'hair',
+    titleEn: 'Hair transplant case 3',
+    titleAr: 'الحالة الثالثة لزراعة الشعر',
+    tagEn: CATEGORY_META.hair.tagEn,
+    tagAr: CATEGORY_META.hair.tagAr,
+    captionEn: 'Before and after photos: Hair transplant case 3',
+    captionAr: 'صور قبل وبعد: الحالة الثالثة لزراعة الشعر',
+    visible: true,
+  },
+  {
+    id: 'case-plastic-1',
+    src: DEFAULT_ASSETS.case7,
+    category: 'plastic',
+    titleEn: 'Tummy tuck and VASER liposuction',
+    titleAr: 'شد البطن وشفط الدهون بالفيزر',
+    tagEn: CATEGORY_META.plastic.tagEn,
+    tagAr: CATEGORY_META.plastic.tagAr,
+    captionEn: 'Before and after photos: Tummy tuck and VASER liposuction',
+    captionAr: 'صور قبل وبعد: شد البطن وشفط الدهون بالفيزر',
+    visible: true,
+  },
+  {
+    id: 'case-plastic-2',
+    src: DEFAULT_ASSETS.case8,
+    category: 'plastic',
+    titleEn: 'Facelift',
+    titleAr: 'شد الوجه',
+    tagEn: CATEGORY_META.plastic.tagEn,
+    tagAr: CATEGORY_META.plastic.tagAr,
+    captionEn: 'Before and after photos: Facelift',
+    captionAr: 'صور قبل وبعد: شد الوجه',
+    visible: true,
+  },
+  {
+    id: 'case-spine-1',
+    src: DEFAULT_ASSETS.case9,
+    category: 'spine',
+    titleEn: 'Scoliosis treatment',
+    titleAr: 'علاج الجنف',
+    tagEn: CATEGORY_META.spine.tagEn,
+    tagAr: CATEGORY_META.spine.tagAr,
+    captionEn: 'Before and after photos: Scoliosis treatment',
+    captionAr: 'صور قبل وبعد: علاج الجنف',
     visible: true,
   },
 ];
@@ -204,8 +269,8 @@ const INITIAL_LEADS: ConsultationLead[] = [
     phone: '551234890',
     country: 'Saudi Arabia',
     email: 'sara.m@example.com',
-    serviceValue: 'hollywood',
-    timeline: 'Within 1–3 months',
+    serviceValue: 'dental',
+    timeline: '1–3 months',
     message: 'أرغب في معرفة تكلفة هوليوود سمايل (20 سن) ومدة الإقامة المطلوبة في إسطنبول.',
     status: 'new',
     adminNotes: 'Prefer evening WhatsApp call after 6 PM Istanbul time.',
@@ -219,11 +284,11 @@ const INITIAL_LEADS: ConsultationLead[] = [
     phone: '1704481920',
     country: 'Germany',
     email: 'l.schneider@example.de',
-    serviceValue: 'zirconia',
-    timeline: 'As soon as possible',
-    message: 'Looking for full upper and lower German zirconia crowns + airport VIP pickup from Frankfurt flight.',
+    serviceValue: 'hair',
+    timeline: 'ASAP',
+    message: 'Interested in DHI / Sapphire FUE hair transplantation with VIP airport transfer.',
     status: 'contacted',
-    adminNotes: 'Sent panoramic X-ray instructions & 5-day treatment itinerary via WhatsApp.',
+    adminNotes: 'Sent photo instructions & treatment itinerary via WhatsApp.',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
     langSubmitted: 'en',
   },
@@ -234,11 +299,11 @@ const INITIAL_LEADS: ConsultationLead[] = [
     phone: '879871122',
     country: 'Ireland',
     email: 'aoife.oconnor@example.ie',
-    serviceValue: 'implants',
-    timeline: 'Within 1–3 months',
-    message: 'Interested in dental implants and porcelain veneers package with hotel near the clinic.',
+    serviceValue: 'plastic',
+    timeline: '1–3 months',
+    message: 'Looking for consultation regarding rhinoplasty and hotel booking near the clinic.',
     status: 'booked',
-    adminNotes: 'Confirmed Dublin–Istanbul flight on the 22nd — VIP Transfer & 5-Star Hotel arranged.',
+    adminNotes: 'Confirmed Dublin–Istanbul flight on the 22nd — VIP Transfer arranged.',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 22).toISOString(),
     langSubmitted: 'en',
   },
@@ -268,366 +333,189 @@ const COUNTRY_CODES = [
 
 const TRANSLATIONS = {
   en: {
-    brandSubtitle: 'Look Beautiful, Live Healthy',
-    topBar: {
-      accredited: 'JCI & ISO Certified Partner Clinics in Istanbul',
-      materials: 'Certified German & Swiss Materials (Ivoclar E-Max® & Straumann®)',
-      warranty: '10-Year Written International Warranty',
-      onlineNow: 'Coordinators Online Now',
-    },
+    pageTitle: 'Estelux | Premium Medical Treatments in Istanbul',
+    brandSubtitle: 'Live Healthy · Look Beautiful',
     nav: {
-      homeAria: 'ESTELUX Home',
-      logoAlt: 'ESTELUX — Look Beautiful, Live Healthy',
-      treatments: 'Treatments',
-      gallery: 'Smile Gallery',
-      whyUs: 'Why ESTELUX',
-      journey: 'Patient Journey',
-      reviews: 'Reviews',
-      faq: 'FAQ',
-      allServices: 'Other Specialties',
-      freeQuote: 'Free Smile Quote',
+      homeAria: 'Estelux',
+      logoAlt: 'ESTELUX — Live Healthy · Look Beautiful',
+      services: 'Our Services',
+      support: 'Patient Support',
+      reviews: 'Patient Reviews',
+      freeQuote: 'Get Your Free Consultation',
       langSwitch: 'العربية',
       whatsapp: 'WhatsApp',
-      whatsappAria: 'Contact ESTELUX on WhatsApp',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      whatsappAria: 'Contact Estelux on WhatsApp',
       dashboardBtn: 'Dashboard',
       backToSite: 'View Landing Page',
       returnToAdmin: 'Coordinator Mode Active — Return to Control Center',
     },
     hero: {
-      kicker: 'PREMIER DENTAL AESTHETICS • ISTANBUL, TÜRKIYE',
-      responseBadge: 'Avg. Coordinator Reply: Under 10 Mins',
-      title: 'Dental Surgery & Luxury Smile Aesthetics',
-      subtitle: 'Excellence in Medical Care',
-      slogan: 'Look Beautiful, Live Healthy — Precision Digital Dentistry in Istanbul.',
-      lead: 'Experience world-class Hollywood Smile veneers, German zirconia crowns, and Swiss dental implants in Istanbul—at up to 70% savings compared to Western Europe, the UK, and GCC. From your free 3D online assessment to VIP airport pickup and 5-star hotel stay, ESTELUX coordinates every detail.',
-      primaryCta: 'Get Free Treatment Plan',
-      whatsappCta: 'Chat on WhatsApp',
+      title: 'Premium Medical Treatments in Istanbul',
+      sloganLeft: 'Live Healthy',
+      sloganRight: 'Look Beautiful',
+      lead: 'At Estelux, your health and satisfaction come first. Our experienced doctors listen to your goals, follow medical standards, and aim for natural-looking results that bring out the best in you.',
+      primaryCta: 'Get Your Free Consultation',
+      whatsappCta: 'WhatsApp',
       whatsappPrefill:
-        'Hello ESTELUX Istanbul, I am interested in a free dental consultation and treatment quote. Could you please share more details?',
-      photoAlt: 'ESTELUX Dental Surgery & Cosmetic Dentistry specialist suite in Istanbul',
-      photoCaption: '3D Digital Smile Design & Pain-Free Aesthetic Dentistry in Istanbul',
-      metrics: [
-        { value: '5,200+', label: 'Smile Transformations' },
-        { value: '15+ Yrs', label: 'Specialist Surgeons' },
-        { value: 'Up to 70%', label: 'Savings vs. EU & UK' },
-        { value: '10-Year', label: 'Written Warranty' },
-      ],
-      resultsHeading: 'Verified Clinical Smile Transformations',
-      resultsSub: 'Real patient outcomes achieved in 5–7 days in Istanbul. Click any case to inspect.',
-      resultsHint: 'Click to enlarge',
-      verifiedBadge: 'Verified Case',
-      filters: {
-        all: 'All Cases',
-        hollywood: 'Hollywood Smile',
-        cosmetic: 'Crowns & Implants',
-      },
+        'Hello Estelux, I would like to request a free consultation regarding medical treatments in Istanbul.',
       casePrefix: 'Case #',
     },
-    treatmentsSection: {
-      kicker: 'SIGNATURE DENTAL PACKAGES',
-      heading: 'Tailored Dental Treatments in Istanbul',
-      sub: 'Every procedure uses CE & FDA-certified European materials with a written international warranty and VIP travel coordination.',
-      durationLabel: 'Istanbul Stay:',
-      warrantyLabel: 'Warranty:',
-      ctaText: 'Request Quote for This Treatment',
+    specialtiesSection: {
+      heading: 'Our Medical Services',
+      enlargePrefix: 'Enlarge',
+      consultCta: 'Request a Free Consultation',
+      dental: {
+        id: 'dental' as SpecialtyCategory,
+        title: 'Dental Surgery & Cosmetic Dentistry',
+        desc: 'E-max veneers, zirconia crowns, dental implants, and full-mouth rehabilitation. Treatment planning considers facial harmony, bite alignment, and everyday function.',
+      },
+      hair: {
+        id: 'hair' as SpecialtyCategory,
+        title: 'Hair Transplantation',
+        desc: 'Experienced physicians perform hair transplants using modern techniques such as DHI and Sapphire FUE. Hairline design, graft angles, and density follow your features and natural growth pattern.',
+      },
+      plastic: {
+        id: 'plastic' as SpecialtyCategory,
+        title: 'Plastic & Aesthetic Surgery',
+        faceTitle: 'Face',
+        faceDesc:
+          'Facelifts, neck lifts, eyelid surgery, rhinoplasty, and more. Each procedure is planned with a fresher, more youthful appearance in mind, while preserving your natural features.',
+        bodyTitle: 'Body',
+        bodyDesc:
+          'Body contouring and aesthetic surgery for women and men, including tummy tucks, VASER liposuction, gynecomastia surgery, breast augmentation, breast lifts, and more.',
+      },
+      spine: {
+        id: 'spine' as SpecialtyCategory,
+        title: 'Spine Surgery & Spinal Disorders Treatment',
+        desc: 'Specialist assessment to identify the cause of symptoms and discuss treatment options based on your diagnosis.',
+        experience: 'Over 30 years of experience in spine surgery',
+        offerings: [
+          'Disc herniation and neck or back pain',
+          'Scoliosis and spinal deformities',
+          'Kyphosis and spinal balance disorders',
+          'Surgical and non-surgical treatments',
+          'Advanced robotic spine surgery',
+        ],
+      },
+    },
+    support: {
+      heading: 'Patient Support',
       items: [
         {
-          value: 'hollywood',
-          image: '/case-hollywood-2.jpg',
-          badge: 'Most Popular',
-          title: 'Hollywood Smile & E-Max® Veneers',
-          stay: '5–7 Days',
-          warranty: '10-Year Guarantee',
-          desc: 'Ultra-thin Ivoclar Vivadent® E-Max porcelain laminate veneers custom-crafted with 3D Digital Smile Design for natural translucency and facial harmony.',
-          highlights: [
-            '3D Digital Smile Preview & trial mock-up before bonding',
-            'Stain-resistant German porcelain in natural or Hollywood shades',
-            'Minimal tooth preparation preserving healthy enamel',
-          ],
+          title: 'VIP Private Transfers',
+          desc: 'Door-to-door service between the airport, your hotel, and the clinic or hospital.',
         },
         {
-          value: 'zirconia',
-          image: '/case-cosmetic-1.jpg',
-          badge: 'Full Restoration',
-          title: 'German Zirconia Crowns & Cosmetic Dentistry',
-          stay: '5–7 Days',
-          warranty: '10-Year Guarantee',
-          desc: 'High-translucency multilayer monolithic zirconia crowns combining exceptional bite strength with lifelike enamel aesthetics.',
-          highlights: [
-            '100% biocompatible, metal-free German CAD/CAM zirconia',
-            'Ideal for damaged, heavily filled, or missing teeth bridges',
-            'Precision digital intraoral scanning (no messy impressions)',
-          ],
+          title: 'Accommodation Booking',
+          desc: 'Hotel reservations arranged on request.',
         },
         {
-          value: 'implants',
-          image: '/case-cosmetic-2.jpg',
-          badge: 'Permanent Solution',
-          title: 'Dental Implants & Full Arch Reconstruction',
-          stay: '3–5 Days / Stage',
-          warranty: 'Lifetime Implant Warranty',
-          desc: 'Swiss and German titanium implants placed with 3D CBCT computer-guided precision for missing teeth or full-jaw fixed rehabilitation.',
-          highlights: [
-            'Premium Straumann® & Nobel Biocare® implant systems',
-            'Immediate temporary fixed teeth so you never leave toothless',
-            'Painless local anesthesia or sedation options available',
-          ],
+          title: 'Language Assistance',
+          desc: 'Communication support for international patients in languages such as English, Arabic, French, and Spanish.',
         },
         {
-          value: 'dental',
-          image: '/case-hollywood-1.jpg',
-          badge: 'Complete Smile Design',
-          title: 'Aesthetic Smile Reconstruction & Alignment',
-          stay: '5–7 Days',
-          warranty: '10-Year Guarantee',
-          desc: 'Comprehensive cosmetic dentistry and prosthetic rehabilitation correcting gaps, severe wear, and bite asymmetry in a single coordinated trip.',
-          highlights: [
-            'Custom shade and tooth morphology tailored to your face',
-            'Laser gum contouring (pink aesthetics) for balanced proportions',
-            'Includes panoramic X-ray, 3D CBCT scan, and aftercare kit',
-          ],
+          title: 'Dedicated Patient Coordinator',
+          desc: 'A dedicated coordinator supports you through diagnosis and treatment planning, your arrival in Istanbul, and your procedure. Follow-up continues after you return home.',
         },
       ],
     },
-    whyUs: {
-      kicker: 'THE ESTELUX STANDARD',
-      heading: 'Why International Patients Trust ESTELUX',
-      sub: 'We combine senior prosthodontic artistry with effortless 5-star hospitality in the heart of Istanbul.',
-      items: [
-        {
-          title: 'Approve Your Smile Before Placement',
-          desc: 'Using 3D intraoral scanning and a physical trial mock-up, you see and approve the exact shape, length, and shade of your new teeth before final bonding.',
-        },
-        {
-          title: '100% Certified European Brands',
-          desc: 'Every veneer, crown, and implant comes with an official serial-numbered authenticity card from Ivoclar Vivadent®, Straumann®, or Nobel Biocare®.',
-        },
-        {
-          title: 'Transparent All-Inclusive Packages',
-          desc: 'Your personalized treatment quote covers 3D CBCT scans, panoramic X-rays, temporary teeth, medications, VIP airport transfers, and hotel coordination—with zero hidden clinic fees.',
-        },
-        {
-          title: 'Dedicated Multilingual Host 24/7',
-          desc: 'A personal English, German, or Arabic-speaking coordinator accompanies you at every clinic appointment so communication is effortless.',
-        },
-      ],
-    },
-    journey: {
-      kicker: 'HOW IT WORKS',
-      heading: 'Your 4-Step Smile Journey in Istanbul',
-      sub: 'From your first WhatsApp message to your final reveal, everything is organized for a stress-free experience.',
-      steps: [
-        {
-          num: '01',
-          title: 'Free Online Smile Assessment',
-          desc: 'Send us smile photos or a recent X-ray via WhatsApp or our form. Our senior dental surgeons prepare a detailed treatment plan and fixed price quote within 24 hours.',
-        },
-        {
-          num: '02',
-          title: 'VIP Arrival & 5-Star Hotel',
-          desc: 'Once you book your flight to Istanbul, our private VIP chauffeur greets you at the airport and drives you directly to your partner hotel and clinic appointments.',
-        },
-        {
-          num: '03',
-          title: '3D Digital Design & Treatment',
-          desc: 'We perform a 3D CBCT scan, design your custom smile digitally, fit your temporary teeth on day one, and craft your final restorations in our CAD/CAM lab.',
-        },
-        {
-          num: '04',
-          title: 'Final Smile Reveal & Warranty',
-          desc: 'After your final fitting and bite check, you receive your official 10-year / lifetime warranty certificate and ongoing remote aftercare support.',
-        },
-      ],
+    social: {
+      heading: 'Connect with Estelux',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      whatsapp: 'WhatsApp',
     },
     reviews: {
-      kicker: 'PATIENT STORIES',
-      heading: 'Trusted by Patients Across Europe & GCC',
-      sub: 'Read verified experiences from international patients who chose ESTELUX Istanbul for their smile transformation.',
-      verifiedLabel: 'Verified Patient',
+      heading: 'Patient Reviews',
       items: [
         {
-          name: 'Markus H.',
-          country: 'Munich, Germany 🇩🇪',
-          treatment: '20 E-Max® Veneers',
-          quote:
-            'My dentist in Munich quoted me over €16,000. At ESTELUX in Istanbul I paid a fraction of that, stayed in a 5-star hotel, and the digital smile design looks completely natural.',
+          quote: '“The digital smile design looks completely natural.”',
+          cite: 'Markus H. · Munich',
         },
         {
-          name: 'Ciara Doyle',
-          country: 'Dublin, Ireland 🇮🇪',
-          treatment: 'Hollywood Smile & Gum Contouring',
-          quote:
-            'From the VIP pickup at Istanbul Airport to my final fitting, the coordination was flawless. Zero pain, no hidden costs, and I got to preview my teeth shape before they were cemented.',
+          quote: '“The coordination was flawless.”',
+          cite: 'Ciara D. · Dublin',
         },
         {
-          name: 'Faisal Al-Harbi',
-          country: 'Riyadh, Saudi Arabia 🇸🇦',
-          treatment: 'Full-Mouth Zirconia Crowns',
-          quote:
-            'The Arabic-speaking coordinator accompanied me at every step. The clinic is ultra-modern and my new smile was finished in just 6 days.',
-        },
-        {
-          name: 'Charlotte Evans',
-          country: 'London, United Kingdom 🇬🇧',
-          treatment: 'Dental Implants & Crowns',
-          quote:
-            'I was nervous about traveling abroad for dental implants, but the surgeon explained my 3D scan in detail and gave me a written warranty certificate. Best decision I ever made.',
-        },
-      ],
-    },
-    faq: {
-      kicker: 'FREQUENTLY ASKED QUESTIONS',
-      heading: 'Everything You Need to Know Before Travelling',
-      sub: 'Have another question? Message our medical coordinators directly on WhatsApp for an instant answer.',
-      items: [
-        {
-          q: 'How many days do I need to stay in Istanbul for a Hollywood Smile or Crowns?',
-          a: 'For E-Max® porcelain veneers or German zirconia crowns, a stay of 5 to 7 days in Istanbul is sufficient. You will have 3 to 4 comfortable clinic visits with plenty of free time to enjoy Istanbul.',
-        },
-        {
-          q: 'How long does Dental Implant treatment take?',
-          a: 'Dental implant placement requires a 3 to 5 day visit for the surgical placement and temporary teeth. After a 3 to 4 month healing period (osseointegration) at home, you return for 5 to 6 days to fit your permanent zirconia or porcelain crowns.',
-        },
-        {
-          q: 'Are the procedures painful?',
-          a: 'No. All treatments are performed under modern digital local anesthesia (and sedation upon request) so you feel no pain during preparation or placement. We also provide complete post-care medication.',
-        },
-        {
-          q: 'Do you provide a written guarantee for veneers, crowns, and implants?',
-          a: 'Yes. Every patient receives an official written ESTELUX warranty certificate along with original manufacturer serial cards—covering E-Max® veneers and zirconia crowns for 10 years, and titanium dental implants for life.',
-        },
-        {
-          q: 'How can I get an accurate price quote before booking my flight?',
-          a: 'Simply submit the consultation form on this page or message us on WhatsApp with clear photos of your teeth (or a panoramic X-ray if available). Our surgeons will review your case free of charge and send a transparent, itemized treatment plan.',
-        },
-        {
-          q: 'What is included in the VIP transfer and hotel coordination?',
-          a: 'We arrange private airport pickup and drop-off in luxury VIP vehicles, all transfers between your hotel and our clinic, 5-star partner hotel accommodation near the clinic, and a dedicated native-speaking patient host.',
+          quote: '“The Arabic-speaking coordinator accompanied me at every step.”',
+          cite: 'Faisal A. · Riyadh',
         },
       ],
     },
     form: {
-      badge: '100% Free Online Medical Assessment',
-      heading: 'Request Your Free Smile Plan',
-      intro: 'Leave your details below. Our Istanbul medical coordinator will contact you with a personalized treatment plan and cost estimate.',
-      timelineLabel: 'When are you planning treatment?',
+      heading: 'Request a Free Consultation',
+      intro:
+        'Tell us what treatment you’re considering and when you’d like to travel. Our team will contact you on WhatsApp about your free consultation.',
+      timelineLabel: 'When do you plan to come to Istanbul?',
       timelines: [
-        { value: 'As soon as possible', label: 'As soon as possible' },
-        { value: 'Within 1–3 months', label: 'Within 1–3 months' },
-        { value: 'Just researching / price check', label: 'Price check' },
+        { value: 'soon', label: 'ASAP' },
+        { value: '1-3-months', label: '1–3 months' },
+        { value: 'later', label: '3+ months' },
+        { value: 'quote', label: 'Price check' },
       ],
       countryCodeAria: 'Country dialing code',
       fullName: 'Full name',
-      fullNamePlaceholder: 'Your full name',
-      whatsapp: 'WhatsApp number',
-      whatsappPlaceholder: '7700 900077',
+      fullNamePlaceholder: 'Full name',
+      whatsapp: 'WhatsApp number (with country code)',
+      whatsappPlaceholder: '555 000 0000',
       country: 'Country of residence',
-      countryPlaceholder: 'e.g., Germany, Ireland, UK, Saudi Arabia',
+      countryPlaceholder: 'Country of residence',
+      serviceLabel: 'Treatment of interest',
+      servicePlaceholder: 'Select a service',
+      services: [
+        { value: 'dental', label: 'Dental Surgery & Cosmetic Dentistry' },
+        { value: 'hair', label: 'Hair Transplantation' },
+        { value: 'plastic', label: 'Plastic & Aesthetic Surgery' },
+        { value: 'spine', label: 'Spine Surgery & Spinal Disorders Treatment' },
+        { value: 'unsure', label: 'I’m not sure yet' },
+      ],
+      arrivalDate: 'Expected arrival date (optional)',
       email: 'Email address (optional)',
       emailPlaceholder: 'you@example.com',
-      serviceLabel: 'Interested treatment',
-      services: [
-        { value: 'hollywood', label: 'Hollywood Smile & E-Max® Porcelain Veneers' },
-        { value: 'zirconia', label: 'German Zirconia Crowns & Full Rehabilitation' },
-        { value: 'implants', label: 'Dental Implants (All-on-4 / All-on-6)' },
-        { value: 'dental', label: 'General Dental Surgery & Cosmetic Dentistry' },
-        { value: 'whitening', label: 'Laser Teeth Whitening & Gum Aesthetics' },
-        { value: 'hair', label: 'Hair Transplantation (Sapphire FUE / DHI)' },
-        { value: 'plastic', label: 'Plastic & Cosmetic Surgery' },
-        { value: 'spine', label: 'Spine & Orthopedic Surgery' },
-      ],
-      message: 'Smile goals or questions (optional)',
-      messagePlaceholder: 'Tell us about your dental goals, number of teeth, or preferred travel dates...',
-      consent: 'I agree to be contacted by ESTELUX regarding my free medical consultation.',
-      submit: 'Get My Free Smile Assessment',
-      submitting: 'Preparing your request...',
-      whatsappDirect: 'Or Chat Instantly on WhatsApp',
-      note: '🔒 100% Confidential • No-Obligation Quote • Response in ~10 mins',
+      message: 'Treatment goals or questions (optional)',
+      messagePlaceholder: 'Share your goals, questions, or any details you’d like our doctors to know...',
+      consent: 'I agree to be contacted by Estelux about my request.',
+      submit: 'Send Consultation Request',
+      submitting: 'Sending your request...',
       errors: {
         name: 'Please enter your full name.',
         phone: 'Please enter a valid WhatsApp phone number.',
         country: 'Please enter your country of residence.',
+        service: 'Please select a treatment of interest.',
         email: 'Please enter a valid email address.',
-        consent: 'Please confirm privacy consent to continue.',
+        consent: 'Please agree to be contacted to continue.',
       },
       confirmTitle: 'Consultation Request Received!',
       confirmBody:
-        'Thank you. Your inquiry has been assigned to a senior Istanbul patient coordinator. Tap below to send your summary on WhatsApp for priority same-hour review.',
-      confirmWaBtn: 'Send on WhatsApp for Instant Reply',
-      resetBtn: 'Submit another inquiry',
-      waSummaryIntro: 'Hello ESTELUX Istanbul, I would like to receive my free consultation and treatment quote.',
+        'Thank you. Our team will contact you on WhatsApp about your free consultation. You can also send your request directly on WhatsApp below.',
+      confirmWaBtn: 'Continue on WhatsApp',
+      resetBtn: 'Submit another request',
+      waSummaryIntro: 'Hello Estelux, I would like to request a free consultation.',
       waFieldName: 'Name',
       waFieldPhone: 'WhatsApp',
       waFieldCountry: 'Country',
       waFieldEmail: 'Email',
-      waFieldService: 'Treatment',
-      waFieldTimeline: 'Timeline',
-      waFieldNotes: 'Notes',
-    },
-    tourism: {
-      heading: '5-Star VIP Medical Travel Included',
-      sub: 'Everything coordinated from Istanbul Airport arrival to post-care follow-up.',
-      items: [
-        {
-          title: 'VIP AIRPORT & CLINIC TRANSFER',
-          desc: 'Private Mercedes-Benz airport pickup and comfortable chauffeur transfers between your hotel and clinic.',
-        },
-        {
-          title: 'LUXURY 5-STAR ACCOMMODATION',
-          desc: 'Curated partner hotels located minutes away from our dental center in central Istanbul.',
-        },
-        {
-          title: 'PERSONAL PATIENT CONCIERGE',
-          desc: 'Dedicated native-speaking translator and priority appointment scheduling throughout your stay.',
-        },
-      ],
-    },
-    services: {
-      kicker: 'COMPREHENSIVE CARE IN ISTANBUL',
-      heading: 'Additional Medical Specialties',
-      sub: 'Beyond dental aesthetics, ESTELUX coordinates specialized surgical care with top accredited hospitals in Istanbul.',
-      items: [
-        {
-          value: 'hair',
-          title: 'Hair Transplantation',
-          desc: 'Maximum-density Sapphire FUE and DHI hair & beard restoration with natural hairline design and PRP therapy.',
-          linkText: 'Inquire about Hair Restoration',
-        },
-        {
-          value: 'plastic',
-          title: 'Plastic & Cosmetic Surgery',
-          desc: 'Rhinoplasty, facial rejuvenation, and body contouring performed by board-certified plastic surgeons.',
-          linkText: 'Inquire about Plastic Surgery',
-        },
-        {
-          value: 'spine',
-          title: 'Spine & Orthopedic Surgery',
-          desc: 'Advanced minimally invasive spinal assessment and surgical care supported by modern hospital technology.',
-          linkText: 'Inquire about Spine Surgery',
-        },
-      ],
-    },
-    ctaBanner: {
-      kicker: 'START YOUR SMILE TRANSFORMATION',
-      heading: 'Ready to Discover Your New Smile in Istanbul?',
-      sub: 'Send us a quick message on WhatsApp or request your complimentary online assessment today. No obligation, transparent pricing.',
-      primaryBtn: 'Request Free Assessment',
-      waBtn: 'WhatsApp Us Now',
+      waFieldService: 'Treatment of interest',
+      waFieldTimeline: 'Travel window',
+      waFieldArrival: 'Expected arrival date',
+      waFieldNotes: 'Treatment goals / questions',
     },
     lightbox: {
       close: 'Close',
       prev: 'Previous case',
       next: 'Next case',
-      cta: 'Request Quote for Similar Smile',
+      cta: 'Request a Free Consultation',
     },
     footer: {
-      slogan: 'Look Beautiful, Live Healthy — Istanbul, Türkiye.',
+      location: 'Istanbul, Türkiye',
       whatsappLabel: 'WhatsApp',
       privacy: 'Privacy Policy',
-      rights: `© ${new Date().getFullYear()} ESTELUX Istanbul. All rights reserved.`,
+      rights: `© ${new Date().getFullYear()} ESTELUX. All rights reserved.`,
       privacyTitle: 'Privacy & Medical Confidentiality Policy',
       privacyText:
-        'ESTELUX strictly protects your personal and medical inquiry information in accordance with international health data protection standards. Details and photos submitted are reviewed exclusively by our medical coordination team and dental surgeons to prepare your treatment plan and are never shared with third parties.',
+        'Estelux strictly protects your personal and medical inquiry information in accordance with international health data protection standards. Details submitted are reviewed exclusively by our medical coordination team and doctors to prepare your consultation and are never shared with third parties.',
       close: 'Close',
     },
     admin: {
@@ -680,13 +568,13 @@ const TRANSLATIONS = {
         deleteConfirm: 'Click again to confirm delete',
         deleteBtn: 'Delete',
         waReplyGreeting: (name: string, service: string) =>
-          `Hello ${name}, thank you for contacting ESTELUX Istanbul regarding ${service}. Our medical coordinator is ready to assist you with your treatment plan.`,
+          `Hello ${name}, thank you for contacting Estelux regarding ${service}. Our medical coordinator is ready to assist you with your free consultation.`,
       },
       media: {
-        brandSectionTitle: 'Brand Logo & Hero Banner Image',
+        brandSectionTitle: 'Brand Logo & Hero Image',
         brandSectionSub: 'Upload from your device (auto-optimized) or paste an image URL. Updates appear immediately on the landing page.',
         logoLabel: 'ESTELUX Brand Logo',
-        heroPhotoLabel: 'Hero Featured Clinic Photo',
+        heroPhotoLabel: 'Hero Brand Artwork',
         uploadBtn: 'Upload File',
         urlPlaceholder: 'Or paste image URL (https://...)',
         applyUrl: 'Apply',
@@ -694,12 +582,14 @@ const TRANSLATIONS = {
         addCaseTitle: 'Add New Before & After Clinical Case',
         addCaseSub: 'Upload a clinical transformation photo and provide English & Arabic titles.',
         caseTitleEn: 'Title (English)',
-        caseTitleEnPh: 'e.g., 20 E-Max® Porcelain Veneers',
+        caseTitleEnPh: 'e.g., Hollywood Smile',
         caseTitleAr: 'Title (Arabic)',
-        caseTitleArPh: 'مثال: ٢٠ عدسة إيماكس خزفية',
-        caseCategory: 'Category',
-        catHollywood: 'Hollywood Smile',
-        catCosmetic: 'Cosmetic Dentistry / Crowns & Implants',
+        caseTitleArPh: 'مثال: هوليوود سمايل',
+        caseCategory: 'Medical Specialty',
+        catDental: 'Dental Surgery & Cosmetic Dentistry',
+        catHair: 'Hair Transplantation',
+        catPlastic: 'Plastic & Aesthetic Surgery',
+        catSpine: 'Spine Surgery & Spinal Disorders Treatment',
         caseCaptionEn: 'Short Description (English)',
         caseCaptionAr: 'Short Description (Arabic)',
         choosePhoto: 'Choose Photo from Device',
@@ -720,366 +610,189 @@ const TRANSLATIONS = {
     },
   },
   ar: {
-    brandSubtitle: 'تألّق بجمالك، وعِش بصحة',
-    topBar: {
-      accredited: 'مراكز طبية معتمدة دولياً (JCI & ISO) في إسطنبول',
-      materials: 'مواد ألمانية وسويسرية أصلية (Ivoclar E-Max® & Straumann®)',
-      warranty: 'ضمان دولي مكتوب لمدة ١٠ سنوات',
-      onlineNow: 'فريق التنسيق متاح الآن',
-    },
+    pageTitle: 'إيستالوكس | رعاية طبية متميّزة في إسطنبول',
+    brandSubtitle: 'عِش بصحّة · تألّق بجمالك',
     nav: {
-      homeAria: 'الصفحة الرئيسية ESTELUX',
-      logoAlt: 'ESTELUX — تألّق بجمالك، وعِش بصحة',
-      treatments: 'علاجات الأسنان',
-      gallery: 'نتائج قبل وبعد',
-      whyUs: 'لماذا ESTELUX',
-      journey: 'رحلة العلاج',
+      homeAria: 'إيستالوكس',
+      logoAlt: 'إيستالوكس — عِش بصحّة · تألّق بجمالك',
+      services: 'خدماتنا',
+      support: 'خدمات دعم المرضى',
       reviews: 'آراء المرضى',
-      faq: 'الأسئلة الشائعة',
-      allServices: 'تخصصات أخرى',
-      freeQuote: 'استشارة مجانية',
+      freeQuote: 'احصل على استشارتك المجانية',
       langSwitch: 'English',
       whatsapp: 'واتساب',
-      whatsappAria: 'تواصل مع ESTELUX عبر واتساب',
+      instagram: 'إنستغرام',
+      facebook: 'فيسبوك',
+      whatsappAria: 'تواصل مع إيستالوكس عبر واتساب',
       dashboardBtn: 'لوحة التحكم',
       backToSite: 'عرض صفحة الهبوط',
       returnToAdmin: 'وضع الإدارة نشط — العودة إلى لوحة التحكم',
     },
     hero: {
-      kicker: 'الرائدون في طب الأسنان التجميلي • إسطنبول، تركيا',
-      responseBadge: 'معدل الرد عبر واتساب: أقل من ١٠ دقائق',
-      title: 'جراحة الأسنان وتصميم الابتسامة الفاخرة',
-      subtitle: 'التميّز في الرعاية الطبية',
-      slogan: 'تألّق بجمالك، وعِش بصحة — دقة طب الأسنان الرقمي في إسطنبول.',
-      lead: 'احصل على ابتسامة هوليوود بعدسات الإيماكس الألمانية، وتيجان الزيركون، وزراعة الأسنان السويسرية في إسطنبول بتوفير يصل إلى ٧٠٪ مقارنة بأوروبا والخليج. بدءاً من التقييم المجاني عبر الإنترنت وحتى الاستقبال الخاص VIP من المطار والإقامة الفندقية الفاخرة، تنسّق ESTELUX كل تفاصيل رحلتك.',
-      primaryCta: 'احصل على خطة علاج مجانية',
-      whatsappCta: 'تحدث عبر واتساب',
+      title: 'رعاية طبية متميّزة في إسطنبول',
+      sloganLeft: 'عِش بصحّة',
+      sloganRight: 'تألّق بجمالك',
+      lead: 'في إيستالوكس، صحتك ورضاك أولويتنا. يستمع أطباؤنا ذوو الخبرة إلى أهدافك، ويلتزمون بالمعايير الطبية، ويسعون إلى نتائج طبيعية تبرز أجمل ما فيك.',
+      primaryCta: 'احصل على استشارتك المجانية',
+      whatsappCta: 'واتساب',
       whatsappPrefill:
-        'مرحباً ESTELUX إسطنبول، أرغب في الحصول على استشارة مجانية وعرض سعر لتجميل وعلاج الأسنان.',
-      photoAlt: 'استشارة جراحة الأسنان وتجميلها في عيادة ESTELUX إسطنبول',
-      photoCaption: 'تصميم الابتسامة الرقمي ثلاثي الأبعاد وطب الأسنان التجميلي بدون ألم في إسطنبول',
-      metrics: [
-        { value: '+٥,٢٠٠', label: 'ابتسامة ناجحة' },
-        { value: '+١٥ سنة', label: 'خبرة الأطباء الجراحين' },
-        { value: 'حتى ٧٠٪', label: 'توفير في التكلفة' },
-        { value: '١٠ سنوات', label: 'ضمان دولي مكتوب' },
-      ],
-      resultsHeading: 'نتائج سريرية موثقة لابتسامات مرضانا',
-      resultsSub: 'تحولات حقيقية تم إنجازها خلال ٥ إلى ٧ أيام في إسطنبول. اضغط على أي صورة للتكبير.',
-      resultsHint: 'انقر للتكبير',
-      verifiedBadge: 'حالة موثقة',
-      filters: {
-        all: 'جميع الحالات',
-        hollywood: 'هوليوود سمايل',
-        cosmetic: 'زيركون وزراعة الأسنان',
-      },
+        'مرحباً إيستالوكس، أرغب في طلب استشارة مجانية بخصوص العلاجات الطبية في إسطنبول.',
       casePrefix: 'حالة رقم ',
     },
-    treatmentsSection: {
-      kicker: 'باقات علاج وتجميل الأسنان',
-      heading: 'أحدث تقنيات تجميل وجراحة الأسنان في إسطنبول',
-      sub: 'نستخدم حصرياً مواد أوروبية معتمدة من FDA و CE مع شهادة ضمان دولية مكتوبة وخدمات استقبال VIP متكاملة.',
-      durationLabel: 'مدة الإقامة في إسطنبول:',
-      warrantyLabel: 'الضمان:',
-      ctaText: 'اطلب عرض سعر لهذا الإجراء',
+    specialtiesSection: {
+      heading: 'خدماتنا الطبية',
+      enlargePrefix: 'تكبير الصورة:',
+      consultCta: 'اطلب استشارة مجانية',
+      dental: {
+        id: 'dental' as SpecialtyCategory,
+        title: 'جراحة الأسنان وتجميلها',
+        desc: 'قشور إيماكس، وتلبيسات الزيركون، وزراعة الأسنان، وإعادة تأهيل الفم بالكامل. تراعي الخطة العلاجية تناسق الابتسامة مع ملامح الوجه، والإطباق، وكفاءة المضغ.',
+      },
+      hair: {
+        id: 'hair' as SpecialtyCategory,
+        title: 'زراعة الشعر',
+        desc: 'يجري أطباء ذوو خبرة زراعة الشعر بتقنيات حديثة مثل DHI وSapphire FUE. ويُصمَّم خطّ الشعر وتُحدَّد زوايا الغرس وتوزيع الكثافة بما ينسجم مع ملامح الوجه ونمط نمو الشعر الطبيعي.',
+      },
+      plastic: {
+        id: 'plastic' as SpecialtyCategory,
+        title: 'جراحات التجميل',
+        faceTitle: 'عمليات الوجه',
+        faceDesc:
+          'تشمل خيارات تجميل الوجه شدّ الوجه والرقبة، وجراحة الجفون، وتجميل الأنف، وغيرها من الإجراءات. ويهدف جرّاحونا إلى إبراز مظهر أكثر نضارة وشباباً مع الحفاظ على ملامحك الطبيعية.',
+        bodyTitle: 'عمليات الجسم',
+        bodyDesc:
+          'نحت القوام وجراحات تجميل الجسم للنساء والرجال، بما يشمل شدّ البطن وشفط الدهون بالفيزر وتصحيح التثدّي وتكبير الثدي ورفعه، وغيرها من الإجراءات.',
+      },
+      spine: {
+        id: 'spine' as SpecialtyCategory,
+        title: 'جراحة العمود الفقري وعلاج أمراضه',
+        desc: 'تقييم متخصص لتحديد أسباب الأعراض ومناقشة خيارات العلاج المناسبة للتشخيص.',
+        experience: 'أكثر من ٣٠ عاماً من الخبرة في جراحة العمود الفقري',
+        offerings: [
+          'الانزلاق الغضروفي (الديسك) وآلام الرقبة والظهر',
+          'الجنف وتشوّهات العمود الفقري',
+          'الحداب واضطرابات توازن العمود الفقري',
+          'العلاجات الجراحية وغير الجراحية',
+          'الجراحة الروبوتية المتقدمة للعمود الفقري',
+        ],
+      },
+    },
+    support: {
+      heading: 'خدمات دعم المرضى',
       items: [
         {
-          value: 'hollywood',
-          image: '/case-hollywood-2.jpg',
-          badge: 'الأكثر طلباً',
-          title: 'هوليوود سمايل وعدسات إيماكس (E-Max®)',
-          stay: '٥ – ٧ أيام',
-          warranty: 'ضمان ١٠ سنوات',
-          desc: 'عدسات خزفية فائقة الرقة من Ivoclar Vivadent® الألمانية مصممة بتقنية التصميم الرقمي ثلاثي الأبعاد لشفافية طبيعية وتناسق مثالي مع الوجه.',
-          highlights: [
-            'بروفة رقمية وتجربة شكل الابتسامة قبل التركيب النهائي',
-            'خزف ألماني مقاوم للتصبغات بدرجات بياض طبيعية أو ناصعة',
-            'حفاظ فائق على طبقة المينا الصحية بأقل برد ممكن',
-          ],
+          title: 'تنقّلات خاصة VIP',
+          desc: 'خدمة تنقّل من الباب إلى الباب بين المطار والفندق والعيادة أو المستشفى.',
         },
         {
-          value: 'zirconia',
-          image: '/case-cosmetic-1.jpg',
-          badge: 'تأهيل شامل',
-          title: 'تيجان الزيركون الألماني وتجميل الأسنان',
-          stay: '٥ – ٧ أيام',
-          warranty: 'ضمان ١٠ سنوات',
-          desc: 'تيجان زيركونيا ألمانية متعددة الطبقات تجمع بين القوة الفائقة لتحمل المضغ والمظهر الطبيعي الشفاف للأسنان.',
-          highlights: [
-            'زيركون حيوي خالٍ تماماً من المعادن ومصنع بتقنية CAD/CAM',
-            'مثالي لتعويض الأسنان المتضررة أو الجسور المتكاملة',
-            'مسح رقمي ثلاثي الأبعاد للفم بدون طبعات تقليدية مزعجة',
-          ],
+          title: 'حجز الإقامة',
+          desc: 'خدمة حجز الفنادق متاحة عند الطلب.',
         },
         {
-          value: 'implants',
-          image: '/case-cosmetic-2.jpg',
-          badge: 'حل دائم مدى الحياة',
-          title: 'زراعة الأسنان وتعويض الأسنان المفقودة',
-          stay: '٣ – ٥ أيام لكل مرحلة',
-          warranty: 'ضمان مدى الحياة للزرعات',
-          desc: 'زرعات تيتانيوم سويسرية وألمانية يتم وضعها بتوجيه ثلاثي الأبعاد (3D CBCT) لتعويض الأسنان المفقودة أو الفك بالكامل.',
-          highlights: [
-            'أنظمة Straumann® و Nobel Biocare® العالمية المعتمدة',
-            'تركيب أسنان مؤقتة ثابتة فوراً خلال نفس الزيارة',
-            'إجراء غير مؤلم تحت التخدير الموضعي الرقمي أو التهدئة',
-          ],
+          title: 'المساعدة اللغوية',
+          desc: 'دعم لغوي للمرضى الدوليين بلغات مثل الإنجليزية والعربية والفرنسية والإسبانية.',
         },
         {
-          value: 'dental',
-          image: '/case-hollywood-1.jpg',
-          badge: 'تصميم متكامل للابتسامة',
-          title: 'ترميم الابتسامة وتصحيح الإطباق التجميلي',
-          stay: '٥ – ٧ أيام',
-          warranty: 'ضمان ١٠ سنوات',
-          desc: 'علاج تجميلي وتعويضي متكامل لإغلاق الفراغات وتصحيح تآكل الأسنان وتناسق اللثة في رحلة علاجية واحدة.',
-          highlights: [
-            'تصميم مخصص لشكل ولون الأسنان بما يناسب ملامح الوجه',
-            'تحديد وتوريد اللثة بالليزر لإبراز جمال الابتسامة',
-            'يشمل الأشعة البانورامية والمسح ثلاثي الأبعاد 3D CBCT',
-          ],
+          title: 'منسّق شخصي للمريض',
+          desc: 'يرافقك منسّق شخصي خلال التشخيص ووضع الخطة العلاجية، وعند وصولك إلى إسطنبول وإجراء العلاج. وتستمر المتابعة بعد عودتك إلى بلدك.',
         },
       ],
     },
-    whyUs: {
-      kicker: 'معايير ESTELUX الطبية',
-      heading: 'لماذا يختار المرضى الدوليون عيادة ESTELUX؟',
-      sub: 'نجمع بين نخبة استشاريي تجميل الأسنان وخدمات الضيافة الفاخرة من فئة ٥ نجوم في قلب إسطنبول.',
-      items: [
-        {
-          title: 'معاينة واعتماد ابتسامتك قبل التثبيت',
-          desc: 'من خلال المسح الرقمي ثلاثي الأبعاد والنموذج التجريبي (Mock-up)، يمكنك رؤية وتجربة شكل ولون أسنانك الجديدة والموافقة عليها قبل التثبيت النهائي.',
-        },
-        {
-          title: 'مواد أوروبية أصلية ١٠٠٪ بشهادة رقم تسلسلي',
-          desc: 'تأتي كل عدسة وتاج وزرعة مع بطاقة أصالة رسمية برقم تسلسلي من شركات Ivoclar Vivadent® و Straumann® و Nobel Biocare®.',
-        },
-        {
-          title: 'باقات شاملة بأسعار واضحة بدون رسوم خفية',
-          desc: 'يشمل عرض السعر تصوير الأشعة البانورامية والمقطعية 3D CBCT، والأسنان المؤقتة، والأدوية، واستقبال المطار VIP، وتنسيق الفندق بدون أي تكاليف إضافية.',
-        },
-        {
-          title: 'مرافق ومترجم شخصي يتحدث لغتك ٢٤/٧',
-          desc: 'يرافقك منسق شخصي يتحدث العربية أو الإنجليزية أو الألمانية في جميع مواعيدك الطبية لضمان راحتك التامة.',
-        },
-      ],
-    },
-    journey: {
-      kicker: 'خطوات بسيطة وواضحة',
-      heading: 'رحلة ابتسامتك في إسطنبول في ٤ خطوات',
-      sub: 'من رسالتك الأولى عبر واتساب وحتى عودتك بابتسامتك الجديدة، نرتب لك كل شيء بدقة واحترافية.',
-      steps: [
-        {
-          num: '٠١',
-          title: 'تقييم طبي مجاني عبر الإنترنت',
-          desc: 'أرسل صور أسنانك أو صورة أشعة عبر واتساب أو النموذج. يقوم أطباؤنا بإعداد خطة علاج مفصلة وعرض سعر ثابت خلال ٢٤ ساعة.',
-        },
-        {
-          num: '٠٢',
-          title: 'استقبال VIP من المطار وإقامة ٥ نجوم',
-          desc: 'فور وصولك إلى مطار إسطنبول، يستقبلك سائقنا الخاص بسيارة VIP فاخرة ليقلك إلى فندقك والعيادة في جميع مواعيدك.',
-        },
-        {
-          num: '٠٣',
-          title: 'التصميم الرقمي ثلاثي الأبعاد والعلاج',
-          desc: 'نجري فحص 3D CBCT، ونصمم ابتسامتك رقمياً، ونركب الأسنان المؤقتة في اليوم الأول بينما يصنع مختبرنا الرقمي تركيباتك النهائية.',
-        },
-        {
-          num: '٠٤',
-          title: 'التركيب النهائي وشهادة الضمان الدولي',
-          desc: 'بعد التأكد من دقة الإطباق وجمال الابتسامة، تتسلم شهادة الضمان الرسمية لمدة ١٠ سنوات / مدى الحياة مع متابعة طبية مستمرة.',
-        },
-      ],
+    social: {
+      heading: 'تواصل مع إيستالوكس',
+      instagram: 'إنستغرام',
+      facebook: 'فيسبوك',
+      whatsapp: 'واتساب',
     },
     reviews: {
-      kicker: 'تجارب حقيقية لمرضانا',
-      heading: 'ثقة المرضى من الخليج وأوروبا',
-      sub: 'اطلع على تجارب المرضى الذين اختاروا ESTELUX إسطنبول لتجميل وزراعة الأسنان.',
-      verifiedLabel: 'مراجع موثق',
+      heading: 'آراء المرضى',
       items: [
         {
-          name: 'فيصل الحربي',
-          country: 'الرياض، السعودية 🇸🇦',
-          treatment: 'تيجان الزيركون الألماني للفكين',
-          quote:
-            'المنسق الطبي رافقني منذ وصولي مطار إسطنبول وحتى انتهاء العلاج. العيادة حديثة جداً والنتيجة طبيعية للغاية وتمت خلال ٦ أيام فقط.',
+          quote: '«تصميم الابتسامة الرقمي يبدو طبيعياً تماماً.»',
+          cite: 'ماركوس هـ. · ميونخ',
         },
         {
-          name: 'ماركوس هـ.',
-          country: 'ميونخ، ألمانيا 🇩🇪',
-          treatment: '٢٠ عدسة إيماكس (هوليوود سمايل)',
-          quote:
-            'في ألمانيا طلبوا مني أكثر من ١٦ ألف يورو. في ESTELUX حصلت على نفس عدسات الإيماكس السويسرية/الألمانية الأصلية مع إقامة فندقية ٥ نجوم وبأقل من ثلث التكلفة.',
+          quote: '«كان التنسيق ممتازاً.»',
+          cite: 'كيارا د. · دبلن',
         },
         {
-          name: 'سيارا دويل',
-          country: 'دبلن، أيرلندا 🇮🇪',
-          treatment: 'هوليوود سمايل وتجميل اللثة بالليزر',
-          quote:
-            'تنظيم رائع من الاستقبال في المطار وحتى الجلسة النهائية. لم أشعر بأي ألم، وأعجبني أنني شاهدت شكل الأسنان التجريبي قبل التركيب الدائم.',
-        },
-        {
-          name: 'شارلوت إيفانز',
-          country: 'لندن، المملكة المتحدة 🇬🇧',
-          treatment: 'زراعة الأسنان السويسرية وتيجان الخزف',
-          quote:
-            'كنت مترددة بشأن السفر لعلاج الأسنان، لكن الجراح شرح لي الأشعة ثلاثية الأبعاد بالتفصيل وسلمني شهادة ضمان دولية مكتوبة. أفضل قرار اتخذته.',
-        },
-      ],
-    },
-    faq: {
-      kicker: 'الأسئلة الشائعة',
-      heading: 'كل ما تود معرفته قبل السفر إلى إسطنبول',
-      sub: 'هل لديك سؤال آخر؟ تواصل مع منسقينا الطبيين مباشرة عبر واتساب للحصول على إجابة فورية.',
-      items: [
-        {
-          q: 'كم يوماً أحتاج للإقامة في إسطنبول لإجراء هوليوود سمايل أو تيجان الزيركون؟',
-          a: 'لإجراء عدسات الإيماكس (E-Max®) أو تيجان الزيركون الألماني، تكفي إقامة لمدة ٥ إلى ٧ أيام في إسطنبول، تتخللها ٣ إلى ٤ زيارات مريحة للعيادة مع وقت كافٍ للاستمتاع بالمدينة.',
-        },
-        {
-          q: 'كم تستغرق عملية زراعة الأسنان؟',
-          a: 'تتطلب المرحلة الأولى لزراعة الأسنان وتركيب الأسنان المؤقتة زيارة لمدة ٣ إلى ٥ أيام فقط. وبعد التئام العظم مع الزرعة (من ٣ إلى ٤ أشهر)، تعود في زيارة ثانية لمدة ٥ إلى ٦ أيام لتركيب التيجان الدائمة.',
-        },
-        {
-          q: 'هل الإجراءات مؤلمة؟',
-          a: 'إطلاقاً. جميع العلاجات تتم تحت التخدير الموضعي الرقمي الحديث (مع توفر خيار التهدئة عند الطلب) لضمان عدم الشعور بأي ألم أثناء التحضير أو التركيب.',
-        },
-        {
-          q: 'هل تقدمون ضماناً مكتوباً على العدسات والتيجان والزراعة؟',
-          a: 'نعم، يحصل كل مراجع على شهادة ضمان رسمية مكتوبة من ESTELUX بالإضافة إلى بطاقات الرقم التسلسلي الأصلية، وتشمل ضمان ١٠ سنوات لعدسات الإيماكس والزيركون، وضمان مدى الحياة لزرعات التيتانيوم.',
-        },
-        {
-          q: 'كيف أحصل على التكلفة الدقيقة وخطة العلاج قبل حجز الطيران؟',
-          a: 'فقط أرسل طلبك عبر النموذج في هذه الصفحة أو راسلنا عبر واتساب مع صور واضحة لأسنانك (أو صورة أشعة بانورامية إن وجدت). سيقوم أطباؤنا بدراسة حالتك مجاناً وإرسال خطة علاج مفصلة وواضحة.',
-        },
-        {
-          q: 'ماذا تشمل خدمات الاستقبال VIP والإقامة الفندقية؟',
-          a: 'نرتب لك الاستقبال والتوديع من مطار إسطنبول بسيارات VIP خاصة، وجميع التنقلات بين الفندق والعيادة، وحجز فندق ٥ نجوم قريب من المركز الطبي، ومترجم شخصي مرافق لك.',
+          quote: '«رافقني المنسّق الناطق بالعربية في كل خطوة.»',
+          cite: 'فيصل أ. · الرياض',
         },
       ],
     },
     form: {
-      badge: 'تقييم طبي مجاني ١٠٠٪ عبر الإنترنت',
-      heading: 'اطلب خطة علاجك المجانية',
-      intro: 'اترك بياناتك ليتواصل معك فريق التنسيق في إسطنبول ويجهز خطتك العلاجية المخصصة مع التكلفة التقديرية.',
-      timelineLabel: 'متى تخطط لإجراء العلاج؟',
+      heading: 'اطلب استشارة مجانية',
+      intro:
+        'أخبرنا بالعلاج الذي تفكّر فيه والموعد المتوقع للسفر. سيتواصل معك فريقنا عبر واتساب بشأن استشارتك المجانية.',
+      timelineLabel: 'متى تخطّط للقدوم إلى إسطنبول؟',
       timelines: [
-        { value: 'As soon as possible', label: 'في أقرب وقت ممكن' },
-        { value: 'Within 1–3 months', label: 'خلال ١ – ٣ أشهر' },
-        { value: 'Just researching / price check', label: 'استفسار عن الأسعار' },
+        { value: 'soon', label: 'بأقرب وقت' },
+        { value: '1-3-months', label: '١–٣ أشهر' },
+        { value: 'later', label: 'أكثر من ٣ أشهر' },
+        { value: 'quote', label: 'استفسار عن السعر' },
       ],
       countryCodeAria: 'رمز الدولة الدولي',
       fullName: 'الاسم الكامل',
-      fullNamePlaceholder: 'أدخل اسمك الكامل',
-      whatsapp: 'رقم الواتساب',
-      whatsappPlaceholder: '5XX XXX XXXX',
+      fullNamePlaceholder: 'الاسم الكامل',
+      whatsapp: 'رقم واتساب مع رمز الدولة',
+      whatsappPlaceholder: '555 000 0000',
       country: 'بلد الإقامة',
-      countryPlaceholder: 'مثال: السعودية، الإمارات، ألمانيا، بريطانيا',
+      countryPlaceholder: 'بلد الإقامة',
+      serviceLabel: 'العلاج الذي يهمّك',
+      servicePlaceholder: 'اختَر خدمة',
+      services: [
+        { value: 'dental', label: 'جراحة الأسنان وتجميلها' },
+        { value: 'hair', label: 'زراعة الشعر' },
+        { value: 'plastic', label: 'جراحات التجميل' },
+        { value: 'spine', label: 'جراحة العمود الفقري وعلاج أمراضه' },
+        { value: 'unsure', label: 'لم أحدّد بعد' },
+      ],
+      arrivalDate: 'تاريخ الوصول المتوقع (اختياري)',
       email: 'البريد الإلكتروني (اختياري)',
       emailPlaceholder: 'you@example.com',
-      serviceLabel: 'الإجراء المطلوب',
-      services: [
-        { value: 'hollywood', label: 'هوليوود سمايل وعدسات إيماكس (E-Max®)' },
-        { value: 'zirconia', label: 'تيجان الزيركون الألماني وتأهيل الفكين' },
-        { value: 'implants', label: 'زراعة الأسنان السويسرية (All-on-4 / All-on-6)' },
-        { value: 'dental', label: 'جراحة الأسنان وتجميلها الشامل' },
-        { value: 'whitening', label: 'تبييض الأسنان بالليزر وتجميل اللثة' },
-        { value: 'hair', label: 'زراعة الشعر (Sapphire FUE / DHI)' },
-        { value: 'plastic', label: 'الجراحة التجميلية والترميمية' },
-        { value: 'spine', label: 'جراحة العمود الفقري والعظام' },
-      ],
-      message: 'تفاصيل إضافية أو استفسارك (اختياري)',
-      messagePlaceholder: 'أخبرنا عن أهداف ابتسامتك أو عدد الأسنان أو الموعد المناسب للسفر...',
-      consent: 'أوافق على تواصل ESTELUX معي بخصوص طلب الاستشارة الطبية المجانية.',
-      submit: 'احصل على تقييمي المجاني الآن',
+      message: 'أهداف العلاج أو أسئلتك (اختياري)',
+      messagePlaceholder: 'شاركنا أهدافك العلاجية أو أي أسئلة تودّ طرحها على أطبائنا...',
+      consent: 'أوافق على تواصل إيستالوكس معي بخصوص طلبي.',
+      submit: 'أرسل طلب الاستشارة',
       submitting: 'جاري إرسال طلبك...',
-      whatsappDirect: 'أو تحدث فوراً عبر واتساب',
-      note: '🔒 سرية تامة ١٠٠٪ • استشارة مجانية بدون التزام • رد خلال ١٠ دقائق',
       errors: {
         name: 'يرجى إدخال الاسم الكامل.',
         phone: 'يرجى إدخال رقم واتساب صحيح.',
         country: 'يرجى إدخال بلد الإقامة.',
+        service: 'يرجى اختيار العلاج الذي يهمّك.',
         email: 'يرجى إدخال بريد إلكتروني صحيح.',
         consent: 'يرجى الموافقة للمتابعة.',
       },
       confirmTitle: 'تم استلام طلب الاستشارة بنجاح!',
       confirmBody:
-        'شكراً لك. تم تحويل طلبك إلى منسق المرضى في إسطنبول. اضغط أدناه لإرسال ملخص طلبك مباشرة عبر واتساب للحصول على أولوية الرد الفوري.',
-      confirmWaBtn: 'أرسل عبر واتساب للرد الفوري',
+        'شكراً لك. سيتواصل معك فريقنا عبر واتساب بشأن استشارتك المجانية. يمكنك أيضاً إرسال ملخص طلبك مباشرة عبر واتساب أدناه.',
+      confirmWaBtn: 'المتابعة عبر واتساب',
       resetBtn: 'إرسال طلب استشارة آخر',
-      waSummaryIntro: 'مرحباً ESTELUX إسطنبول، أرغب في الحصول على استشارة مجانية وخطة علاج.',
-      waFieldName: 'الاسم',
-      waFieldPhone: 'رقم الواتساب',
+      waSummaryIntro: 'مرحباً إيستالوكس، أرغب في طلب استشارة مجانية.',
+      waFieldName: 'الاسم الكامل',
+      waFieldPhone: 'رقم واتساب',
       waFieldCountry: 'بلد الإقامة',
       waFieldEmail: 'البريد الإلكتروني',
-      waFieldService: 'الإجراء المطلوب',
-      waFieldTimeline: 'الموعد المقترح',
-      waFieldNotes: 'ملاحظات',
-    },
-    tourism: {
-      heading: 'خدمات سياحة علاجية VIP من فئة ٥ نجوم',
-      sub: 'تنسيق مريح ومتكامل من لحظة وصولك مطار إسطنبول وحتى المتابعة بعد العودة.',
-      items: [
-        {
-          title: 'استقبال وتنقلات VIP خاصة',
-          desc: 'استقبال خاص من المطار بسيارات مرسيدس VIP وتنقلات مريحة بين الفندق والعيادة طوال إقامتك.',
-        },
-        {
-          title: 'إقامة فندقية فاخرة ٥ نجوم',
-          desc: 'ترتيبات إقامة في فنادق فاخرة مختارة بعناية على بُعد دقائق من مركزنا الطبي في إسطنبول.',
-        },
-        {
-          title: 'منسق ومترجم شخصي مرافق',
-          desc: 'تنسيق كامل للمواعيد الطبية ومرافقة شخصيةبلغتك الأم في جميع خطوات العلاج.',
-        },
-      ],
-    },
-    services: {
-      kicker: 'رعاية طبية متكاملة في إسطنبول',
-      heading: 'تخصصات طبية وجراحية إضافية',
-      sub: 'إلى جانب طب الأسنان التجميلي، تنسق ESTELUX إجراءات جراحية متخصصة في أفضل المستشفيات المعتمدة في إسطنبول.',
-      items: [
-        {
-          value: 'hair',
-          title: 'زراعة الشعر الطبيعي',
-          desc: 'تقنيات السفير FUE وأقلام تشوي DHI لزراعة الشعر واللحية بكثافة قصوى وخط مقدمة طبيعي.',
-          linkText: 'استفسر عن زراعة الشعر',
-        },
-        {
-          value: 'plastic',
-          title: 'الجراحة التجميلية والترميمية',
-          desc: 'تجميل الأنف، شد الوجه، ونحت القوام بإشراف نخبة من جراحي التجميل المعتمدين.',
-          linkText: 'استفسر عن الجراحة التجميلية',
-        },
-        {
-          value: 'spine',
-          title: 'جراحة العمود الفقري والعظام',
-          desc: 'تشخيص دقيق وجراحات طفيفة التوغل للعمود الفقري والمفاصل بأحدث التقنيات الطبية.',
-          linkText: 'استفسر عن جراحة العمود الفقري',
-        },
-      ],
-    },
-    ctaBanner: {
-      kicker: 'ابدأ رحلة ابتسامتك الجديدة',
-      heading: 'هل أنت مستعد لتصميم ابتسامتك المثالية في إسطنبول؟',
-      sub: 'تواصل معنا عبر واتساب أو اطلب تقييمك الطبي المجاني اليوم. أسعار واضحة وخدمة VIP متكاملة.',
-      primaryBtn: 'اطلب تقييمك المجاني',
-      waBtn: 'راسلنا عبر واتساب الآن',
+      waFieldService: 'العلاج الذي يهمّك',
+      waFieldTimeline: 'موعد السفر المتوقع',
+      waFieldArrival: 'تاريخ الوصول المتوقع',
+      waFieldNotes: 'أهداف العلاج أو الأسئلة',
     },
     lightbox: {
       close: 'إغلاق',
       prev: 'الحالة السابقة',
       next: 'الحالة التالية',
-      cta: 'اطلب استشارة لابتسامة مماثلة',
+      cta: 'اطلب استشارة مجانية',
     },
     footer: {
-      slogan: 'تألّق بجمالك، وعِش بصحة — إسطنبول، تركيا.',
+      location: 'إسطنبول، تركيا',
       whatsappLabel: 'واتساب',
       privacy: 'سياسة الخصوصية',
-      rights: `© ${new Date().getFullYear()} ESTELUX إسطنبول. جميع الحقوق محفوظة.`,
+      rights: `© ${new Date().getFullYear()} إيستالوكس. جميع الحقوق محفوظة.`,
       privacyTitle: 'سياسة الخصوصية والسرية الطبية',
       privacyText:
-        'تحترم ESTELUX خصوصيتك وتحافظ على سرية بياناتك الطبية والشخصية وفق أعلى المعايير الدولية. تُستخدم المعلومات والصور المقدمة حصرياً من قبل الفريق الطبي لتقييم حالتك وإعداد خطة علاجك في إسطنبول ولا يتم مشاركتها مع أي أطراف خارجية.',
+        'تحترم إيستالوكس خصوصيتك وتحافظ على سرية بياناتك الطبية والشخصية وفق أعلى المعايير الدولية. تُستخدم المعلومات المقدمة حصرياً من قبل فريق التنسيق الطبي والأطباء لإعداد استشارتك ولا يتم مشاركتها مع أي أطراف خارجية.',
       close: 'إغلاق',
     },
     admin: {
@@ -1132,13 +845,13 @@ const TRANSLATIONS = {
         deleteConfirm: 'اضغط مرة أخرى لتأكيد الحذف',
         deleteBtn: 'حذف',
         waReplyGreeting: (name: string, service: string) =>
-          `مرحباً ${name}، شكراً لتواصلك مع ESTELUX إسطنبول بخصوص خدمة (${service}). فريق التنسيق الطبي جاهز لمساعدتك وتزويدك بخطة العلاج والتفاصيل.`,
+          `مرحباً ${name}، شكراً لتواصلك مع إيستالوكس بخصوص خدمة (${service}). فريق التنسيق الطبي جاهز لمساعدتك في استشارتك المجانية.`,
       },
       media: {
         brandSectionTitle: 'تعديل شعار العلامة التجارية وصورة الواجهة الرئيسية',
         brandSectionSub: 'ارفع صورة من جهازك (يتم ضغطها تلقائياً) أو الصق رابط صورة مباشر. تظهر التعديلات فوراً في صفحة الهبوط.',
         logoLabel: 'شعار ESTELUX الرسمي',
-        heroPhotoLabel: 'الصورة الرئيسية للعيادة في الواجهة',
+        heroPhotoLabel: 'صورة الواجهة الرئيسية',
         uploadBtn: 'رفع صورة من الجهاز',
         urlPlaceholder: 'أو الصق رابط الصورة (https://...)',
         applyUrl: 'تطبيق',
@@ -1146,12 +859,14 @@ const TRANSLATIONS = {
         addCaseTitle: 'إضافة حالة قبل وبعد جديدة إلى المعرض',
         addCaseSub: 'ارفع صورة الحالة وأدخل العنوان والوصف باللغتين العربية والإنجليزية.',
         caseTitleEn: 'العنوان (بالإنجليزية)',
-        caseTitleEnPh: 'مثال: 20 E-Max® Porcelain Veneers',
+        caseTitleEnPh: 'مثال: Hollywood Smile',
         caseTitleAr: 'العنوان (بالعربية)',
-        caseTitleArPh: 'مثال: ٢٠ عدسة إيماكس خزفية',
-        caseCategory: 'التصنيف',
-        catHollywood: 'هوليوود سمايل',
-        catCosmetic: 'تجميل الأسنان / زيركون وزراعة',
+        caseTitleArPh: 'مثال: هوليوود سمايل',
+        caseCategory: 'التخصص الطبي',
+        catDental: 'جراحة الأسنان وتجميلها',
+        catHair: 'زراعة الشعر',
+        catPlastic: 'جراحات التجميل',
+        catSpine: 'جراحة العمود الفقري وعلاج أمراضه',
         caseCaptionEn: 'وصف مختصر (بالإنجليزية)',
         caseCaptionAr: 'وصف مختصر (بالعربية)',
         choosePhoto: 'اختر صورة من جهازك',
@@ -1179,7 +894,6 @@ const toArabicDigits = (num: number | string) =>
 export function App() {
   const [lang, setLang] = useState<Language>('en');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
   const isSecretAdminUrl = () => {
     if (typeof window === 'undefined') return false;
@@ -1268,18 +982,18 @@ export function App() {
   });
 
   // Public Landing Page UI State
-  const [activeFilter, setActiveFilter] = useState<'all' | 'hollywood' | 'cosmetic'>('all');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Consultation Form State
-  const [selectedServiceValue, setSelectedServiceValue] = useState<string>('hollywood');
-  const [selectedTimeline, setSelectedTimeline] = useState<string>('As soon as possible');
+  const [selectedServiceValue, setSelectedServiceValue] = useState<string>('');
+  const [selectedTimeline, setSelectedTimeline] = useState<string>('soon');
   const [fullName, setFullName] = useState('');
-  const [countryCode, setCountryCode] = useState('+49');
+  const [countryCode, setCountryCode] = useState('+90');
   const [phone, setPhone] = useState('');
   const [country, setCountry] = useState('');
+  const [arrivalDate, setArrivalDate] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [consent, setConsent] = useState(true);
@@ -1300,7 +1014,7 @@ export function App() {
   const [newCaseSrc, setNewCaseSrc] = useState('');
   const [newCaseTitleEn, setNewCaseTitleEn] = useState('');
   const [newCaseTitleAr, setNewCaseTitleAr] = useState('');
-  const [newCaseCategory, setNewCaseCategory] = useState<'hollywood' | 'cosmetic'>('hollywood');
+  const [newCaseCategory, setNewCaseCategory] = useState<SpecialtyCategory>('dental');
   const [newCaseCaptionEn, setNewCaseCaptionEn] = useState('');
   const [newCaseCaptionAr, setNewCaseCaptionAr] = useState('');
   const [editingCaseId, setEditingCaseId] = useState<string | null>(null);
@@ -1357,6 +1071,12 @@ export function App() {
   const isRTL = lang === 'ar';
   const t = TRANSLATIONS[lang];
 
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+    document.title = t.pageTitle;
+  }, [lang, isRTL, t.pageTitle]);
+
   // Sync secret admin route on hashchange / popstate
   useEffect(() => {
     const syncRoute = () => {
@@ -1400,13 +1120,7 @@ export function App() {
 
   // Visible cases for public landing page
   const visibleCases = dentalCases.filter((c) => c.visible);
-  const filteredCases =
-    activeFilter === 'all'
-      ? visibleCases
-      : visibleCases.filter((item) => item.category === activeFilter);
-
-  const selectedServiceObj =
-    t.form.services.find((s) => s.value === selectedServiceValue) || t.form.services[0];
+  const filteredCases = visibleCases;
 
   const defaultWaUrl = `https://wa.me/${WHATSAPP_RAW}?text=${encodeURIComponent(
     t.hero.whatsappPrefill
@@ -1467,6 +1181,7 @@ export function App() {
     const digits = phone.replace(/\D/g, '');
     if (digits.length < 6 || digits.length > 15) nextErrors.phone = t.form.errors.phone;
     if (!country.trim()) nextErrors.country = t.form.errors.country;
+    if (!selectedServiceValue) nextErrors.service = t.form.errors.service;
     if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       nextErrors.email = t.form.errors.email;
     }
@@ -1489,6 +1204,7 @@ export function App() {
       email: email.trim(),
       serviceValue: selectedServiceValue,
       timeline: selectedTimeline,
+      arrivalDate: arrivalDate.trim() || undefined,
       message: message.trim(),
       status: 'new',
       adminNotes: '',
@@ -1504,6 +1220,7 @@ export function App() {
       setFullName('');
       setPhone('');
       setCountry('');
+      setArrivalDate('');
       setEmail('');
       setMessage('');
     }, 380);
@@ -1513,6 +1230,8 @@ export function App() {
     const serviceLabel =
       t.form.services.find((s) => s.value === lead.serviceValue)?.label ||
       t.form.services[0].label;
+    const timelineLabel =
+      t.form.timelines.find((tl) => tl.value === lead.timeline)?.label || lead.timeline;
 
     const summary = [
       t.form.waSummaryIntro,
@@ -1521,7 +1240,8 @@ export function App() {
       `${t.form.waFieldCountry}: ${lead.country}`,
       lead.email ? `${t.form.waFieldEmail}: ${lead.email}` : null,
       `${t.form.waFieldService}: ${serviceLabel}`,
-      lead.timeline ? `${t.form.waFieldTimeline}: ${lead.timeline}` : null,
+      timelineLabel ? `${t.form.waFieldTimeline}: ${timelineLabel}` : null,
+      lead.arrivalDate ? `${t.form.waFieldArrival}: ${lead.arrivalDate}` : null,
       lead.message ? `${t.form.waFieldNotes}: ${lead.message}` : null,
     ]
       .filter(Boolean)
@@ -1704,22 +1424,21 @@ export function App() {
   const handleAddNewCase = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCaseSrc.trim()) return;
-    const titleEn = newCaseTitleEn.trim() || 'Smile Transformation';
-    const titleAr = newCaseTitleAr.trim() || 'تجميل الابتسامة';
+    const titleEn = newCaseTitleEn.trim() || 'Clinical Case';
+    const titleAr = newCaseTitleAr.trim() || 'حالة طبية';
+    const meta = CATEGORY_META[newCaseCategory];
     const created: DentalCase = {
       id: `case-${Date.now()}`,
       src: newCaseSrc.trim(),
       category: newCaseCategory,
       titleEn,
       titleAr,
-      tagEn: newCaseCategory === 'hollywood' ? 'Hollywood Smile' : 'Cosmetic Dentistry',
-      tagAr: newCaseCategory === 'hollywood' ? 'هوليوود سمايل' : 'علاج الأسنان وتجميلها',
+      tagEn: meta.tagEn,
+      tagAr: meta.tagAr,
       captionEn:
-        newCaseCaptionEn.trim() ||
-        'Personalized aesthetic dental transformation in Istanbul.',
+        newCaseCaptionEn.trim() || `Before and after photos: ${titleEn}`,
       captionAr:
-        newCaseCaptionAr.trim() ||
-        'تجميل وتصميم الابتسامة المخصص في إسطنبول.',
+        newCaseCaptionAr.trim() || `صور قبل وبعد: ${titleAr}`,
       visible: true,
     };
     setDentalCases((prev) => [created, ...prev]);
@@ -1847,17 +1566,14 @@ export function App() {
               aria-label="Primary Navigation"
               className="hidden lg:flex items-center gap-7 text-[13px] font-semibold text-[#3B2A26] whitespace-nowrap"
             >
-              <a href="#gallery" className="hover:text-[#9A4F3E] transition-colors py-1">
-                {t.nav.gallery}
+              <a href="#services" className="hover:text-[#9A4F3E] transition-colors py-1">
+                {t.nav.services}
               </a>
-              <a href="#treatments" className="hover:text-[#9A4F3E] transition-colors py-1">
-                {t.nav.treatments}
+              <a href="#support" className="hover:text-[#9A4F3E] transition-colors py-1">
+                {t.nav.support}
               </a>
-              <a href="#journey" className="hover:text-[#9A4F3E] transition-colors py-1">
-                {t.nav.journey}
-              </a>
-              <a href="#faq" className="hover:text-[#9A4F3E] transition-colors py-1">
-                {t.nav.faq}
+              <a href="#reviews" className="hover:text-[#9A4F3E] transition-colors py-1">
+                {t.nav.reviews}
               </a>
             </nav>
           )}
@@ -1872,6 +1588,35 @@ export function App() {
               >
                 <span>{t.nav.backToSite}</span>
               </button>
+            )}
+
+            {view === 'landing' && (
+              <div className="hidden sm:flex items-center gap-1" dir="ltr">
+                <a
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={t.nav.instagram}
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg text-[#884838] hover:bg-[#F7EEEA] transition-colors"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]" aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="5" />
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M17.5 6.5h.01" />
+                  </svg>
+                </a>
+                <a
+                  href={FACEBOOK_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={t.nav.facebook}
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg text-[#884838] hover:bg-[#F7EEEA] transition-colors"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px]" aria-hidden="true">
+                    <path d="M14 22v-9h3l.5-3H14V8c0-.9.3-1.5 1.6-1.5H18V3.8c-.5-.1-1.6-.3-2.8-.3-2.9 0-4.7 1.7-4.7 4.6V10H8v3h2.5v9Z" />
+                  </svg>
+                </a>
+              </div>
             )}
 
             {/* Bilingual Toggle (EN / العربية) */}
@@ -1914,34 +1659,27 @@ export function App() {
         {/* Mobile Drawer Navigation */}
         {view === 'landing' && mobileMenuOpen && (
           <div className="lg:hidden bg-white border-t border-[#E8C9C1] px-4 py-4 space-y-3 shadow-lg">
-            <div className="grid grid-cols-2 gap-2 text-xs font-bold text-[#1C1918]">
+            <div className="grid grid-cols-3 gap-2 text-xs font-bold text-[#1C1918] text-center">
               <a
-                href="#gallery"
+                href="#services"
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-2.5 rounded-xl bg-[#FCF9F7] hover:bg-[#F7EAE6]"
               >
-                {t.nav.gallery}
+                {t.nav.services}
               </a>
               <a
-                href="#treatments"
+                href="#support"
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-2.5 rounded-xl bg-[#FCF9F7] hover:bg-[#F7EAE6]"
               >
-                {t.nav.treatments}
+                {t.nav.support}
               </a>
               <a
-                href="#journey"
+                href="#reviews"
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-2.5 rounded-xl bg-[#FCF9F7] hover:bg-[#F7EAE6]"
               >
-                {t.nav.journey}
-              </a>
-              <a
-                href="#faq"
-                onClick={() => setMobileMenuOpen(false)}
-                className="p-2.5 rounded-xl bg-[#FCF9F7] hover:bg-[#F7EAE6]"
-              >
-                {t.nav.faq}
+                {t.nav.reviews}
               </a>
             </div>
             <a
@@ -2605,12 +2343,14 @@ export function App() {
                       <select
                         value={newCaseCategory}
                         onChange={(e) =>
-                          setNewCaseCategory(e.target.value as 'hollywood' | 'cosmetic')
+                          setNewCaseCategory(e.target.value as SpecialtyCategory)
                         }
                         className="w-full min-h-[42px] px-3 rounded-xl border border-[#CDBBB2] bg-white text-xs sm:text-sm font-semibold"
                       >
-                        <option value="hollywood">{t.admin.media.catHollywood}</option>
-                        <option value="cosmetic">{t.admin.media.catCosmetic}</option>
+                        <option value="dental">{t.admin.media.catDental}</option>
+                        <option value="hair">{t.admin.media.catHair}</option>
+                        <option value="plastic">{t.admin.media.catPlastic}</option>
+                        <option value="spine">{t.admin.media.catSpine}</option>
                       </select>
                     </div>
 
@@ -2754,24 +2494,20 @@ export function App() {
                               <select
                                 value={editDraft.category}
                                 onChange={(e) => {
-                                  const cat = e.target.value as 'hollywood' | 'cosmetic';
+                                  const cat = e.target.value as SpecialtyCategory;
                                   setEditDraft({
                                     ...editDraft,
                                     category: cat,
-                                    tagEn:
-                                      cat === 'hollywood'
-                                        ? 'Hollywood Smile'
-                                        : 'Cosmetic Dentistry',
-                                    tagAr:
-                                      cat === 'hollywood'
-                                        ? 'هوليوود سمايل'
-                                        : 'علاج الأسنان وتجميلها',
+                                    tagEn: CATEGORY_META[cat].tagEn,
+                                    tagAr: CATEGORY_META[cat].tagAr,
                                   });
                                 }}
                                 className="w-full px-2.5 py-1.5 rounded-lg border border-[#CDBBB2] bg-white text-xs font-semibold"
                               >
-                                <option value="hollywood">{t.admin.media.catHollywood}</option>
-                                <option value="cosmetic">{t.admin.media.catCosmetic}</option>
+                                <option value="dental">{t.admin.media.catDental}</option>
+                                <option value="hair">{t.admin.media.catHair}</option>
+                                <option value="plastic">{t.admin.media.catPlastic}</option>
+                                <option value="spine">{t.admin.media.catSpine}</option>
                               </select>
                               <input
                                 type="text"
@@ -2918,46 +2654,46 @@ export function App() {
       )}
 
       {/* =====================================================================
-          VIEW 3: PUBLIC HIGH-CONVERTING DENTAL LANDING PAGE
+          VIEW 3: PUBLIC LANDING PAGE (CLIENT CONTENT & STRUCTURE)
       ====================================================================== */}
       {view === 'landing' && (
         <main>
           {/* =================================================================
-              SECTION 01 — CLEAN LUXURY HERO + SIMPLE CONSULTATION FORM
+              SECTION 01 — HERO
           ================================================================== */}
           <section
             aria-labelledby="main-heading"
-            className="bg-gradient-to-b from-[#F7EAE6]/60 to-[#FCF9F7] py-10 sm:py-16 border-b border-[#E8C9C1]"
+            className="bg-[#F7EEEA] py-12 sm:py-16 border-b border-[#E8D7CF]"
           >
-            <div className="max-w-[1200px] mx-auto px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-              {/* LEFT COLUMN: Clean Headline, Concise Value & Minimal Trust Strip */}
-              <div className="lg:col-span-6 space-y-6">
-                <div className="space-y-4">
-                  <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-[#8C4332]">
-                    {t.hero.kicker}
-                  </p>
+            <div className="max-w-[1120px] mx-auto px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              <div className="lg:col-span-7 space-y-5">
+                <h1
+                  id="main-heading"
+                  className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#32241F] leading-[1.08] tracking-tight"
+                >
+                  {t.hero.title}
+                </h1>
 
-                  <h1
-                    id="main-heading"
-                    className="text-3xl sm:text-5xl font-extrabold text-[#1C1918] leading-[1.12] tracking-tight"
-                  >
-                    {t.hero.title}
-                  </h1>
+                <p className="text-xl sm:text-2xl font-serif text-[#884838] font-medium">
+                  <span>{t.hero.sloganLeft}</span>{' '}
+                  <span className="whitespace-nowrap mx-1.5" aria-hidden="true">
+                    · · ·
+                  </span>{' '}
+                  <span>{t.hero.sloganRight}</span>
+                </p>
 
-                  <p className="text-sm sm:text-base text-[#4A3F3B] leading-relaxed max-w-xl">
-                    {t.hero.lead}
-                  </p>
-                </div>
+                <p className="text-sm sm:text-base text-[#69554E] leading-relaxed max-w-[54ch]">
+                  {t.hero.lead}
+                </p>
 
-                {/* Primary CTAs */}
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3 pt-2">
                   <a
                     href="#consultation"
                     onClick={(e) => {
                       e.preventDefault();
                       handleSelectServiceAndScroll(selectedServiceValue);
                     }}
-                    className="inline-flex items-center justify-center gap-2 min-h-[48px] px-6 py-3 rounded-xl bg-[#9A4F3E] hover:bg-[#7D3D2E] text-white font-bold text-sm shadow-sm transition-colors whitespace-nowrap"
+                    className="inline-flex items-center justify-center gap-2 min-h-[48px] px-6 py-3 rounded-xl bg-[#884838] hover:bg-[#6A382D] text-white font-bold text-sm shadow-sm transition-colors whitespace-nowrap"
                   >
                     <span>{t.hero.primaryCta}</span>
                     {isRTL ? (
@@ -2977,52 +2713,60 @@ export function App() {
                     <span>{t.hero.whatsappCta}</span>
                   </a>
                 </div>
-
-                {/* Minimal 3-Item Trust Row (No Heavy Boxes) */}
-                <div className="pt-4 border-t border-[#E8C9C1] grid grid-cols-3 gap-4 max-w-lg">
-                  {t.hero.metrics.slice(0, 3).map((m) => (
-                    <div key={m.label}>
-                      <p className="text-lg sm:text-xl font-extrabold text-[#1C1918]">
-                        {m.value}
-                      </p>
-                      <p className="text-[11px] font-medium text-[#52443F] mt-0.5">
-                        {m.label}
-                      </p>
-                    </div>
-                  ))}
-                </div>
               </div>
 
-              {/* RIGHT COLUMN: Clean, Spacious Consultation Form */}
-              <section
-                id="consultation"
-                aria-labelledby="form-heading"
-                className="lg:col-span-6 bg-white p-6 sm:p-8 rounded-3xl border border-[#E8C9C1] shadow-[0_14px_40px_rgba(61,34,28,0.06)] scroll-mt-24 max-w-xl w-full lg:ms-auto"
-              >
-                <h2
-                  id="form-heading"
-                  className="text-2xl font-extrabold text-[#1C1918] tracking-tight"
-                >
-                  {t.form.heading}
-                </h2>
-                <p className="mt-1.5 mb-5 text-xs sm:text-sm text-[#52443F] leading-relaxed">
-                  {t.form.intro}
-                </p>
+              <div className="hidden lg:grid lg:col-span-5 place-items-center" aria-hidden="true">
+                <div className="relative w-full max-w-[420px] aspect-[1.16] rounded-t-[49%] rounded-b-xl bg-[radial-gradient(ellipse_at_65%_18%,#A76150,#783D31)] border border-[#AB6C59] grid place-items-center overflow-hidden shadow-md">
+                  <div className="absolute inset-[5%] border border-[#F7DED4]/30 rounded-[inherit] pointer-events-none" />
+                  <div className="absolute inset-[9%] border border-[#F7DED4]/25 rounded-[inherit] pointer-events-none" />
+                  <img
+                    src={heroPhoto || '/client-logo.webp'}
+                    alt=""
+                    width={450}
+                    height={362}
+                    onError={(e) => {
+                      e.currentTarget.src = '/client-logo.webp';
+                    }}
+                    className="w-[69%] h-auto object-contain brightness-0 invert-[93%] sepia-[12%] saturate-[380%] opacity-90"
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
 
-                {submitted && lastSubmittedLead ? (
-                  <div className="p-5 rounded-2xl bg-[#FCF9F7] border border-[#E8C9C1] space-y-3.5">
-                    <div className="flex items-center gap-2 text-[#0F6934] font-extrabold text-base">
-                      <CheckCircle2 className="w-5 h-5 shrink-0" />
-                      <span>{t.form.confirmTitle}</span>
-                    </div>
-                    <p className="text-xs sm:text-sm text-[#4A3F3B] leading-relaxed">
-                      {t.form.confirmBody}
-                    </p>
+          {/* =================================================================
+              SECTION 02 — FREE CONSULTATION FORM
+          ================================================================== */}
+          <section className="max-w-[1120px] mx-auto px-4 sm:px-8 pt-10">
+            <div
+              id="consultation"
+              className="bg-white border border-[#E8D7CF] rounded-2xl p-6 sm:p-9 shadow-[0_12px_26px_rgba(86,46,34,0.04)] scroll-mt-24"
+            >
+              <h2
+                id="form-heading"
+                className="text-2xl sm:text-3xl font-extrabold text-[#32241F] tracking-tight"
+              >
+                {t.form.heading}
+              </h2>
+              <p className="mt-1.5 mb-6 text-sm text-[#69554E] leading-relaxed">
+                {t.form.intro}
+              </p>
+
+              {submitted && lastSubmittedLead ? (
+                <div className="p-5 sm:p-6 rounded-2xl bg-[#FCF9F7] border border-[#E8D7CF] space-y-4">
+                  <div className="flex items-center gap-2 text-[#0F6934] font-extrabold text-base">
+                    <CheckCircle2 className="w-5 h-5 shrink-0" />
+                    <span>{t.form.confirmTitle}</span>
+                  </div>
+                  <p className="text-sm text-[#4A3F3B] leading-relaxed">
+                    {t.form.confirmBody}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
                     <a
                       href={buildWhatsAppLinkFromLead(lastSubmittedLead)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full min-h-[46px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#157A3E] hover:bg-[#106231] text-white font-bold text-sm transition-colors"
+                      className="min-h-[46px] inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#157A3E] hover:bg-[#106231] text-white font-bold text-sm transition-colors"
                     >
                       <MessageCircle className="w-4 h-4" />
                       <span>{t.form.confirmWaBtn}</span>
@@ -3034,119 +2778,108 @@ export function App() {
                         setSubmitted(false);
                         setLastSubmittedLead(null);
                       }}
-                      className="block text-xs font-bold text-[#8C4332] underline underline-offset-4 pt-1 cursor-pointer"
+                      className="text-xs font-bold text-[#884838] underline underline-offset-4 cursor-pointer"
                     >
                       {t.form.resetBtn}
                     </button>
                   </div>
-                ) : (
-                  <form onSubmit={handleSubmit} noValidate className="space-y-4">
-                    {/* Quick Single-Line Timeline Selector Pills */}
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} noValidate className="space-y-5">
+                  {/* Travel Window Selector */}
+                  <fieldset className="border-0 p-0 m-0">
+                    <legend className="text-sm font-bold text-[#32241F] mb-2">
+                      {t.form.timelineLabel}
+                    </legend>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {t.form.timelines.map((tl) => (
+                        <button
+                          key={tl.value}
+                          type="button"
+                          onClick={() => setSelectedTimeline(tl.value)}
+                          className={`min-h-[44px] px-3 py-2 rounded-lg text-sm font-bold border transition-all cursor-pointer text-center ${
+                            selectedTimeline === tl.value
+                              ? 'bg-[#884838] text-white border-[#884838]'
+                              : 'bg-white text-[#32241F] border-[#CBB3A9] hover:border-[#884838]'
+                          }`}
+                        >
+                          {tl.label}
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+
+                  {/* Form Fields Grid (3 columns on desktop, matching client layout) */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Full Name */}
                     <div>
-                      <span className="block text-xs font-bold text-[#1C1918] mb-1.5">
-                        {t.form.timelineLabel}
-                      </span>
-                      <div className="grid grid-cols-3 gap-2">
-                        {t.form.timelines.map((tl, idx) => {
-                          const compactLabel = isRTL
-                            ? idx === 0
-                              ? 'أقرب وقت'
-                              : idx === 1
-                              ? '١ – ٣ أشهر'
-                              : 'الأسعار'
-                            : idx === 0
-                            ? 'ASAP'
-                            : idx === 1
-                            ? '1–3 Months'
-                            : 'Price Check';
-                          return (
-                            <button
-                              key={tl.value}
-                              type="button"
-                              onClick={() => setSelectedTimeline(tl.value)}
-                              className={`h-10 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center whitespace-nowrap ${
-                                selectedTimeline === tl.value
-                                  ? 'bg-[#3D221C] text-white border-[#3D221C]'
-                                  : 'bg-[#FCF9F7] text-[#4A3F3B] border-[#E8C9C1] hover:border-[#B27262]'
-                              }`}
-                            >
-                              {compactLabel}
-                            </button>
-                          );
-                        })}
-                      </div>
+                      <label
+                        htmlFor="full-name"
+                        className="block text-sm font-bold text-[#32241F] mb-1.5"
+                      >
+                        {t.form.fullName} *
+                      </label>
+                      <input
+                        ref={fullNameInputRef}
+                        id="full-name"
+                        type="text"
+                        autoComplete="name"
+                        value={fullName}
+                        onChange={(e) => {
+                          setFullName(e.target.value);
+                          if (errors.name) setErrors({ ...errors, name: '' });
+                        }}
+                        placeholder={t.form.fullNamePlaceholder}
+                        className={`w-full min-h-[47px] px-3.5 rounded-lg border bg-white text-sm text-[#32241F] placeholder:text-[#8E7F7A] focus:outline-none focus:ring-2 focus:ring-[#884838] ${
+                          errors.name ? 'border-red-600' : 'border-[#CBB3A9]'
+                        }`}
+                      />
+                      {errors.name && (
+                        <p className="mt-1 text-xs text-red-700">{errors.name}</p>
+                      )}
                     </div>
 
-                    {/* Full Name & Country */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                      <div>
-                        <label
-                          htmlFor="full-name"
-                          className="block text-xs font-bold text-[#1C1918] mb-1.5"
-                        >
-                          {t.form.fullName} *
-                        </label>
-                        <input
-                          ref={fullNameInputRef}
-                          id="full-name"
-                          type="text"
-                          autoComplete="name"
-                          value={fullName}
-                          onChange={(e) => {
-                            setFullName(e.target.value);
-                            if (errors.name) setErrors({ ...errors, name: '' });
-                          }}
-                          placeholder={t.form.fullNamePlaceholder}
-                          className={`w-full h-[46px] px-3.5 rounded-xl border bg-white text-base sm:text-sm text-[#1C1918] placeholder:text-[#8E7F7A] focus:outline-none focus:ring-2 focus:ring-[#B27262] ${
-                            errors.name ? 'border-red-600' : 'border-[#DDB0A5]'
-                          }`}
-                        />
-                        {errors.name && (
-                          <p className="mt-1 text-xs text-red-700">{errors.name}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label
-                          htmlFor="country"
-                          className="block text-xs font-bold text-[#1C1918] mb-1.5"
-                        >
-                          {t.form.country} *
-                        </label>
-                        <input
-                          id="country"
-                          type="text"
-                          autoComplete="country-name"
-                          value={country}
-                          onChange={(e) => {
-                            setCountry(e.target.value);
-                            if (errors.country) setErrors({ ...errors, country: '' });
-                          }}
-                          placeholder={t.form.countryPlaceholder}
-                          className={`w-full h-[46px] px-3.5 rounded-xl border bg-white text-base sm:text-sm text-[#1C1918] placeholder:text-[#8E7F7A] focus:outline-none focus:ring-2 focus:ring-[#B27262] ${
-                            errors.country ? 'border-red-600' : 'border-[#DDB0A5]'
-                          }`}
-                        />
-                        {errors.country && (
-                          <p className="mt-1 text-xs text-red-700">{errors.country}</p>
-                        )}
-                      </div>
+                    {/* Country of Residence */}
+                    <div>
+                      <label
+                        htmlFor="country"
+                        className="block text-sm font-bold text-[#32241F] mb-1.5"
+                      >
+                        {t.form.country} *
+                      </label>
+                      <input
+                        id="country"
+                        type="text"
+                        autoComplete="country-name"
+                        value={country}
+                        onChange={(e) => {
+                          setCountry(e.target.value);
+                          if (errors.country) setErrors({ ...errors, country: '' });
+                        }}
+                        placeholder={t.form.countryPlaceholder}
+                        className={`w-full min-h-[47px] px-3.5 rounded-lg border bg-white text-sm text-[#32241F] placeholder:text-[#8E7F7A] focus:outline-none focus:ring-2 focus:ring-[#884838] ${
+                          errors.country ? 'border-red-600' : 'border-[#CBB3A9]'
+                        }`}
+                      />
+                      {errors.country && (
+                        <p className="mt-1 text-xs text-red-700">{errors.country}</p>
+                      )}
                     </div>
 
                     {/* WhatsApp Number */}
                     <div>
                       <label
                         htmlFor="whatsapp-phone"
-                        className="block text-xs font-bold text-[#1C1918] mb-1.5"
+                        className="block text-sm font-bold text-[#32241F] mb-1.5"
                       >
                         {t.form.whatsapp} *
                       </label>
-                      <div className="flex gap-2" dir="ltr">
+                      <div className="flex gap-1.5" dir="ltr">
                         <select
                           aria-label={t.form.countryCodeAria}
                           value={countryCode}
                           onChange={(e) => setCountryCode(e.target.value)}
-                          className="w-[106px] shrink-0 h-[46px] px-2.5 rounded-xl border border-[#DDB0A5] bg-[#FCF9F7] text-xs font-bold text-[#1C1918] focus:outline-none focus:ring-2 focus:ring-[#B27262]"
+                          className="w-[96px] shrink-0 min-h-[47px] px-2 rounded-lg border border-[#CBB3A9] bg-[#FCF9F7] text-xs font-bold text-[#32241F] focus:outline-none focus:ring-2 focus:ring-[#884838]"
                         >
                           {COUNTRY_CODES.map((c) => (
                             <option key={c.id} value={c.code}>
@@ -3164,8 +2897,8 @@ export function App() {
                             if (errors.phone) setErrors({ ...errors, phone: '' });
                           }}
                           placeholder={t.form.whatsappPlaceholder}
-                          className={`flex-1 min-w-0 h-[46px] px-3.5 rounded-xl border bg-white text-base sm:text-sm text-[#1C1918] placeholder:text-[#8E7F7A] focus:outline-none focus:ring-2 focus:ring-[#B27262] ${
-                            errors.phone ? 'border-red-600' : 'border-[#DDB0A5]'
+                          className={`flex-1 min-w-0 min-h-[47px] px-3 rounded-lg border bg-white text-sm text-[#32241F] placeholder:text-[#8E7F7A] focus:outline-none focus:ring-2 focus:ring-[#884838] ${
+                            errors.phone ? 'border-red-600' : 'border-[#CBB3A9]'
                           }`}
                         />
                       </div>
@@ -3174,50 +2907,126 @@ export function App() {
                       )}
                     </div>
 
-                    {/* Interested Treatment */}
+                    {/* Treatment of Interest */}
                     <div>
                       <label
                         htmlFor="interested-service"
-                        className="block text-xs font-bold text-[#1C1918] mb-1.5"
+                        className="block text-sm font-bold text-[#32241F] mb-1.5"
                       >
-                        {t.form.serviceLabel}
+                        {t.form.serviceLabel} *
                       </label>
                       <select
                         id="interested-service"
                         value={selectedServiceValue}
-                        onChange={(e) => setSelectedServiceValue(e.target.value)}
-                        className="w-full h-[46px] px-3.5 rounded-xl border border-[#DDB0A5] bg-white text-sm font-semibold text-[#1C1918] focus:outline-none focus:ring-2 focus:ring-[#B27262]"
+                        onChange={(e) => {
+                          setSelectedServiceValue(e.target.value);
+                          if (errors.service) setErrors({ ...errors, service: '' });
+                        }}
+                        className={`w-full min-h-[47px] px-3 rounded-lg border bg-white text-sm text-[#32241F] focus:outline-none focus:ring-2 focus:ring-[#884838] ${
+                          errors.service ? 'border-red-600' : 'border-[#CBB3A9]'
+                        }`}
                       >
+                        <option value="" disabled>
+                          {t.form.servicePlaceholder}
+                        </option>
                         {t.form.services.map((srv) => (
                           <option key={srv.value} value={srv.value}>
                             {srv.label}
                           </option>
                         ))}
                       </select>
+                      {errors.service && (
+                        <p className="mt-1 text-xs text-red-700">{errors.service}</p>
+                      )}
                     </div>
 
-                    {/* Privacy Consent */}
-                    <label className="flex items-start gap-2.5 text-xs text-[#52443F] cursor-pointer">
+                    {/* Expected Arrival Date (optional) */}
+                    <div>
+                      <label
+                        htmlFor="arrival-date"
+                        className="block text-sm font-bold text-[#32241F] mb-1.5"
+                      >
+                        {t.form.arrivalDate}
+                      </label>
                       <input
-                        type="checkbox"
-                        checked={consent}
-                        onChange={(e) => {
-                          setConsent(e.target.checked);
-                          if (errors.consent) setErrors({ ...errors, consent: '' });
-                        }}
-                        className="mt-0.5 h-4 w-4 rounded border-[#DDB0A5] accent-[#9A4F3E]"
+                        id="arrival-date"
+                        type="date"
+                        value={arrivalDate}
+                        onChange={(e) => setArrivalDate(e.target.value)}
+                        className="w-full min-h-[47px] px-3.5 rounded-lg border border-[#CBB3A9] bg-white text-sm text-[#32241F] focus:outline-none focus:ring-2 focus:ring-[#884838]"
                       />
-                      <span className="leading-snug">{t.form.consent}</span>
-                    </label>
-                    {errors.consent && (
-                      <p className="text-xs text-red-700">{errors.consent}</p>
-                    )}
+                    </div>
 
-                    {/* Submit CTA */}
+                    {/* Email Address (optional) */}
+                    <div>
+                      <label
+                        htmlFor="email-address"
+                        className="block text-sm font-bold text-[#32241F] mb-1.5"
+                      >
+                        {t.form.email}
+                      </label>
+                      <input
+                        id="email-address"
+                        type="email"
+                        autoComplete="email"
+                        value={email}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          if (errors.email) setErrors({ ...errors, email: '' });
+                        }}
+                        placeholder={t.form.emailPlaceholder}
+                        className={`w-full min-h-[47px] px-3.5 rounded-lg border bg-white text-sm text-[#32241F] placeholder:text-[#8E7F7A] focus:outline-none focus:ring-2 focus:ring-[#884838] ${
+                          errors.email ? 'border-red-600' : 'border-[#CBB3A9]'
+                        }`}
+                      />
+                      {errors.email && (
+                        <p className="mt-1 text-xs text-red-700">{errors.email}</p>
+                      )}
+                    </div>
+
+                    {/* Treatment Goals or Questions (optional) */}
+                    <div className="md:col-span-3">
+                      <label
+                        htmlFor="treatment-notes"
+                        className="block text-sm font-bold text-[#32241F] mb-1.5"
+                      >
+                        {t.form.message}
+                      </label>
+                      <textarea
+                        id="treatment-notes"
+                        rows={3}
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder={t.form.messagePlaceholder}
+                        className="w-full px-3.5 py-2.5 rounded-lg border border-[#CBB3A9] bg-white text-sm text-[#32241F] placeholder:text-[#8E7F7A] focus:outline-none focus:ring-2 focus:ring-[#884838] resize-y"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Consent & Submit */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
+                    <div>
+                      <label className="flex items-center gap-2.5 text-sm text-[#69554E] cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={consent}
+                          onChange={(e) => {
+                            setConsent(e.target.checked);
+                            if (errors.consent) setErrors({ ...errors, consent: '' });
+                          }}
+                          className="h-[18px] w-[18px] rounded border-[#CBB3A9] accent-[#884838] shrink-0"
+                        />
+                        <span>{t.form.consent}</span>
+                      </label>
+                      {errors.consent && (
+                        <p className="mt-1 text-xs text-red-700">{errors.consent}</p>
+                      )}
+                    </div>
+
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="w-full h-[50px] inline-flex items-center justify-center gap-2 px-5 rounded-xl bg-[#9A4F3E] hover:bg-[#7D3D2E] disabled:opacity-60 text-white font-extrabold text-sm shadow-sm transition-colors cursor-pointer"
+                      className="min-h-[48px] inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-[#884838] hover:bg-[#6A382D] disabled:opacity-60 text-white font-bold text-sm shadow-sm transition-colors cursor-pointer shrink-0"
                     >
                       {submitting ? (
                         <>
@@ -3235,390 +3044,412 @@ export function App() {
                         </>
                       )}
                     </button>
-
-                    <p className="text-[11px] text-center font-medium text-[#52443F]">
-                      {t.form.note}
-                    </p>
-                  </form>
-                )}
-              </section>
-            </div>
-          </section>
-
-          {/* =================================================================
-              SECTION 02 — BEFORE & AFTER CLINICAL GALLERY
-          ================================================================== */}
-          <section
-            id="gallery"
-            aria-labelledby="gallery-heading"
-            className="py-14 sm:py-20 bg-white border-b border-[#E8C9C1] scroll-mt-20"
-          >
-            <div className="max-w-[1200px] mx-auto px-4 sm:px-8 space-y-8">
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                <div className="space-y-1.5">
-                  <h2
-                    id="gallery-heading"
-                    className="text-2xl sm:text-3xl font-extrabold text-[#1C1918] tracking-tight"
-                  >
-                    {t.hero.resultsHeading}
-                  </h2>
-                  <p className="text-sm text-[#52443F]">{t.hero.resultsSub}</p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 shrink-0">
-                  {(
-                    [
-                      { key: 'all', label: t.hero.filters.all },
-                      { key: 'hollywood', label: t.hero.filters.hollywood },
-                      { key: 'cosmetic', label: t.hero.filters.cosmetic },
-                    ] as const
-                  ).map((tab) => (
-                    <button
-                      key={tab.key}
-                      type="button"
-                      onClick={() => {
-                        setActiveFilter(tab.key);
-                        setLightboxIndex(null);
-                      }}
-                      className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer whitespace-nowrap ${
-                        activeFilter === tab.key
-                          ? 'bg-[#9A4F3E] text-white'
-                          : 'bg-[#FCF9F7] text-[#4A3F3B] border border-[#E8C9C1] hover:border-[#B27262]'
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredCases.map((item, index) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setLightboxIndex(index)}
-                    className="luxury-card-hover group rounded-2xl overflow-hidden bg-white border border-[#E8C9C1] hover:border-[#B27262] text-start focus:outline-none focus:ring-2 focus:ring-[#B27262] cursor-pointer flex flex-col"
-                  >
-                    <div className="aspect-square w-full bg-white p-2 border-b border-[#F2E2DC] overflow-hidden">
-                      <img
-                        src={item.src}
-                        alt={isRTL ? item.titleAr : item.titleEn}
-                        width={600}
-                        height={600}
-                        loading={index < 3 ? 'eager' : 'lazy'}
-                        decoding="async"
-                        onError={(e) => {
-                          e.currentTarget.src = DEFAULT_ASSETS.case1;
-                        }}
-                        className="w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-300"
-                      />
-                    </div>
-                    <div className="p-4 bg-[#FCF9F7] flex items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-bold text-[#8C4332]">
-                          {isRTL ? item.tagAr : item.tagEn}
-                        </p>
-                        <h3 className="text-sm font-extrabold text-[#1C1918] truncate mt-0.5">
-                          {isRTL ? item.titleAr : item.titleEn}
-                        </h3>
-                      </div>
-                      <ZoomIn className="w-4 h-4 text-[#9A4F3E] shrink-0" />
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* =================================================================
-              SECTION 03 — SIGNATURE DENTAL TREATMENTS
-          ================================================================== */}
-          <section
-            id="treatments"
-            aria-labelledby="treatments-heading"
-            className="py-14 sm:py-20 bg-[#FCF9F7] border-b border-[#E8C9C1] scroll-mt-20"
-          >
-            <div className="max-w-[1200px] mx-auto px-4 sm:px-8 space-y-10">
-              <div className="max-w-2xl space-y-2">
-                <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#8C4332]">
-                  {t.treatmentsSection.kicker}
-                </p>
-                <h2
-                  id="treatments-heading"
-                  className="text-2xl sm:text-3xl font-extrabold text-[#1C1918] tracking-tight"
-                >
-                  {t.treatmentsSection.heading}
-                </h2>
-                <p className="text-sm text-[#52443F] leading-relaxed">
-                  {t.treatmentsSection.sub}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {t.treatmentsSection.items.map((pkg) => (
-                  <article
-                    key={pkg.value}
-                    className="luxury-card-hover rounded-3xl bg-white border border-[#E8C9C1] p-5 sm:p-6 grid grid-cols-1 sm:grid-cols-12 gap-5 items-center"
-                  >
-                    <div className="sm:col-span-5 rounded-2xl bg-[#FCF9F7] border border-[#F2E2DC] p-2 overflow-hidden">
-                      <img
-                        src={pkg.image}
-                        alt={pkg.title}
-                        width={500}
-                        height={500}
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full aspect-square object-contain mx-auto block"
-                      />
-                    </div>
-
-                    <div className="sm:col-span-7 flex flex-col justify-between gap-4">
-                      <div className="space-y-2.5">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <span className="px-2.5 py-0.5 rounded-md bg-[#F7EAE6] text-[#8C4332] text-[11px] font-bold">
-                            {pkg.stay}
-                          </span>
-                          <span className="px-2.5 py-0.5 rounded-md bg-emerald-50 text-[#0F6934] text-[11px] font-bold">
-                            {pkg.warranty}
-                          </span>
-                        </div>
-
-                        <h3 className="text-lg font-extrabold text-[#1C1918] leading-snug">
-                          {pkg.title}
-                        </h3>
-                        <p className="text-xs sm:text-sm text-[#4A3F3B] leading-relaxed">
-                          {pkg.desc}
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => handleSelectServiceAndScroll(pkg.value)}
-                        className="w-full h-[44px] inline-flex items-center justify-center gap-2 px-4 rounded-xl bg-[#9A4F3E] hover:bg-[#7D3D2E] text-white font-bold text-xs transition-colors cursor-pointer"
-                      >
-                        <span>{t.treatmentsSection.ctaText}</span>
-                        {isRTL ? (
-                          <ArrowLeft className="w-3.5 h-3.5" />
-                        ) : (
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        )}
-                      </button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* =================================================================
-              SECTION 04 — 4-STEP PATIENT JOURNEY + VIP ISTANBUL SUPPORT
-          ================================================================== */}
-          <section
-            id="journey"
-            aria-labelledby="journey-heading"
-            className="py-14 sm:py-20 bg-white border-b border-[#E8C9C1] scroll-mt-20"
-          >
-            <div className="max-w-[1200px] mx-auto px-4 sm:px-8 space-y-10">
-              <div className="max-w-2xl space-y-2">
-                <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#8C4332]">
-                  {t.journey.kicker}
-                </p>
-                <h2
-                  id="journey-heading"
-                  className="text-2xl sm:text-3xl font-extrabold text-[#1C1918] tracking-tight"
-                >
-                  {t.journey.heading}
-                </h2>
-                <p className="text-sm text-[#52443F] leading-relaxed">{t.journey.sub}</p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                {t.journey.steps.map((step) => (
-                  <div
-                    key={step.num}
-                    className="bg-[#FCF9F7] rounded-2xl border border-[#E8C9C1] p-6 space-y-2.5"
-                  >
-                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-[#9A4F3E] text-white font-extrabold text-xs">
-                      {step.num}
-                    </span>
-                    <h3 className="text-base font-extrabold text-[#1C1918]">{step.title}</h3>
-                    <p className="text-xs sm:text-sm text-[#52443F] leading-relaxed">
-                      {step.desc}
-                    </p>
                   </div>
-                ))}
-              </div>
-
-              {/* Simple 3-Pillar VIP Travel Strip */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-4 border-t border-[#E8C9C1]">
-                {t.tourism.items.map((item, idx) => {
-                  const Icon = idx === 0 ? Plane : idx === 1 ? Building2 : CalendarCheck;
-                  return (
-                    <div key={item.title} className="flex items-start gap-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-[#F7EAE6] flex items-center justify-center shrink-0">
-                        <Icon className="w-5 h-5 text-[#8C4332]" strokeWidth={1.8} />
-                      </div>
-                      <div>
-                        <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#1C1918]">
-                          {item.title}
-                        </h3>
-                        <p className="text-xs text-[#52443F] mt-1 leading-relaxed">{item.desc}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                </form>
+              )}
             </div>
           </section>
 
           {/* =================================================================
-              SECTION 05 — PATIENT REVIEWS (3 CLEAN CARDS)
-          ================================================================== */}
-          <section
-            id="reviews"
-            aria-labelledby="reviews-heading"
-            className="py-14 sm:py-20 bg-[#FCF9F7] border-b border-[#E8C9C1] scroll-mt-20"
-          >
-            <div className="max-w-[1200px] mx-auto px-4 sm:px-8 space-y-8">
-              <div className="max-w-2xl space-y-2">
-                <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#8C4332]">
-                  {t.reviews.kicker}
-                </p>
-                <h2
-                  id="reviews-heading"
-                  className="text-2xl sm:text-3xl font-extrabold text-[#1C1918] tracking-tight"
-                >
-                  {t.reviews.heading}
-                </h2>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {t.reviews.items.slice(0, 3).map((rev) => (
-                  <article
-                    key={rev.name}
-                    className="rounded-2xl bg-white border border-[#E8C9C1] p-6 flex flex-col justify-between gap-4"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                        ))}
-                      </div>
-                      <p className="text-xs sm:text-sm text-[#1C1918] leading-relaxed">
-                        "{rev.quote}"
-                      </p>
-                    </div>
-
-                    <div className="pt-3 border-t border-[#F2E2DC] text-xs">
-                      <p className="font-extrabold text-[#1C1918]">{rev.name}</p>
-                      <p className="text-[#52443F] mt-0.5">{rev.country}</p>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* =================================================================
-              SECTION 06 — FREQUENTLY ASKED QUESTIONS (4 ESSENTIAL Q&As)
-          ================================================================== */}
-          <section
-            id="faq"
-            aria-labelledby="faq-heading"
-            className="py-14 sm:py-20 bg-white scroll-mt-20"
-          >
-            <div className="max-w-[820px] mx-auto px-4 sm:px-8 space-y-8">
-              <div className="text-center space-y-2">
-                <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#8C4332]">
-                  {t.faq.kicker}
-                </p>
-                <h2
-                  id="faq-heading"
-                  className="text-2xl sm:text-3xl font-extrabold text-[#1C1918] tracking-tight"
-                >
-                  {t.faq.heading}
-                </h2>
-              </div>
-
-              <div className="space-y-3">
-                {t.faq.items.slice(0, 4).map((item, idx) => {
-                  const isOpen = openFaqIndex === idx;
-                  return (
-                    <div
-                      key={item.q}
-                      className="rounded-2xl bg-[#FCF9F7] border border-[#E8C9C1] overflow-hidden"
-                    >
-                      <button
-                        type="button"
-                        aria-expanded={isOpen}
-                        onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                        className="w-full px-5 py-4 text-start flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-[#1C1918] hover:text-[#9A4F3E] transition-colors cursor-pointer"
-                      >
-                        <span>{item.q}</span>
-                        <ChevronDown
-                          className={`w-5 h-5 text-[#9A4F3E] shrink-0 transition-transform duration-200 ${
-                            isOpen ? 'rotate-180' : ''
-                          }`}
-                        />
-                      </button>
-                      {isOpen && (
-                        <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-[#4A3F3B] leading-relaxed">
-                          {item.a}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
-
-          {/* =================================================================
-              SECTION 07 — ADDITIONAL MEDICAL SPECIALTIES (HAIR, PLASTIC, SPINE)
+              SECTION 03 — OUR MEDICAL SERVICES (4 SPECIALTIES + CASE PHOTOS)
           ================================================================== */}
           <section
             id="services"
             aria-labelledby="services-heading"
-            className="py-14 sm:py-16 bg-[#FCF9F7] border-t border-[#E8C9C1] scroll-mt-20"
+            className="max-w-[1120px] mx-auto px-4 sm:px-8 py-14 sm:py-16 scroll-mt-20"
           >
-            <div className="max-w-[1200px] mx-auto px-4 sm:px-8">
-              <div className="max-w-xl">
-                <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#8C4332] mb-1.5">
-                  {t.services.kicker}
-                </p>
-                <h2
-                  id="services-heading"
-                  className="text-2xl sm:text-3xl font-extrabold text-[#1C1918] tracking-tight"
-                >
-                  {t.services.heading}
-                </h2>
-                <p className="mt-1.5 text-sm text-[#52443F]">{t.services.sub}</p>
-              </div>
+            <h2
+              id="services-heading"
+              className="text-3xl sm:text-4xl font-extrabold text-[#32241F] tracking-tight mb-7"
+            >
+              {t.specialtiesSection.heading}
+            </h2>
 
-              <div className="mt-7 grid grid-cols-1 md:grid-cols-3 gap-5">
-                {t.services.items.map((srv) => (
-                  <article
-                    key={srv.value}
-                    className="luxury-card-hover p-6 rounded-2xl bg-white border border-[#E8C9C1] hover:border-[#B27262] flex flex-col justify-between gap-4"
-                  >
-                    <div>
-                      <h3 className="text-base sm:text-lg font-extrabold text-[#1C1918]">
-                        {srv.title}
-                      </h3>
-                      <p className="mt-2 text-xs sm:text-sm text-[#52443F] leading-relaxed">
-                        {srv.desc}
-                      </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* 1. Dental Surgery & Cosmetic Dentistry */}
+              {(() => {
+                const dentalCasesForCard = visibleCases.filter((c) => c.category === 'dental');
+                return (
+                  <article className="flex flex-col gap-3.5 border border-[#E8D7CF] bg-white rounded-2xl p-6 shadow-[0_6px_18px_rgba(86,46,34,0.03)]">
+                    <div className="w-11 h-11 rounded-xl bg-[#F7EEEA] text-[#884838] grid place-items-center shrink-0">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6" aria-hidden="true">
+                        <path d="M12 4c-2-1-3-2-5-1C2 4 3 10 5 13c1 2 1 8 4 8 2 0 1-7 3-7s1 7 3 7c3 0 3-6 4-8 2-3 3-9-2-10-2-.4-3 .5-5 1Z" />
+                      </svg>
                     </div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-[#32241F] leading-snug">
+                      {t.specialtiesSection.dental.title}
+                    </h3>
+                    <p className="text-sm text-[#69554E] leading-relaxed">
+                      {t.specialtiesSection.dental.desc}
+                    </p>
+
+                    {dentalCasesForCard.length > 0 && (
+                      <div className="grid grid-cols-3 gap-2 mt-auto pt-2">
+                        {dentalCasesForCard.map((item) => {
+                          const globalIdx = visibleCases.findIndex((c) => c.id === item.id);
+                          const label = isRTL ? item.titleAr : item.titleEn;
+                          return (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => setLightboxIndex(globalIdx)}
+                              aria-label={`${t.specialtiesSection.enlargePrefix} ${label}`}
+                              className="group relative bg-[#FDF8F5] border border-[#E8D7CF] hover:border-[#884838] rounded-lg overflow-hidden cursor-zoom-in transition-colors"
+                            >
+                              <img
+                                src={item.src}
+                                alt={label}
+                                loading="lazy"
+                                decoding="async"
+                                className="w-full h-[128px] object-contain bg-[#FDF8F5] group-hover:scale-[1.03] transition-transform duration-300"
+                              />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
                     <button
                       type="button"
-                      onClick={() => handleSelectServiceAndScroll(srv.value)}
-                      className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#8C4332] hover:text-[#1C1918] underline underline-offset-4 self-start cursor-pointer"
+                      onClick={() => handleSelectServiceAndScroll('dental')}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#884838] hover:text-[#32241F] underline underline-offset-4 self-start pt-1 cursor-pointer"
                     >
-                      <span>{srv.linkText}</span>
-                      <ArrowUpRight className="w-4 h-4" />
+                      <span>{t.specialtiesSection.consultCta}</span>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
                     </button>
                   </article>
+                );
+              })()}
+
+              {/* 2. Hair Transplantation */}
+              {(() => {
+                const hairCasesForCard = visibleCases.filter((c) => c.category === 'hair');
+                return (
+                  <article className="flex flex-col gap-3.5 border border-[#E8D7CF] bg-white rounded-2xl p-6 shadow-[0_6px_18px_rgba(86,46,34,0.03)]">
+                    <div className="w-11 h-11 rounded-xl bg-[#F7EEEA] text-[#884838] grid place-items-center shrink-0">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6" aria-hidden="true">
+                        <path d="M3 20h18M7 17c0-6 2-10 7-14M12 17c0-4 2-8 6-10M17 17c0-2 1-4 3-5" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-[#32241F] leading-snug">
+                      {t.specialtiesSection.hair.title}
+                    </h3>
+                    <p className="text-sm text-[#69554E] leading-relaxed">
+                      {t.specialtiesSection.hair.desc}
+                    </p>
+
+                    {hairCasesForCard.length > 0 && (
+                      <div className="grid grid-cols-3 gap-2 mt-auto pt-2">
+                        {hairCasesForCard.map((item) => {
+                          const globalIdx = visibleCases.findIndex((c) => c.id === item.id);
+                          const label = isRTL ? item.titleAr : item.titleEn;
+                          return (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => setLightboxIndex(globalIdx)}
+                              aria-label={`${t.specialtiesSection.enlargePrefix} ${label}`}
+                              className="group relative bg-[#FDF8F5] border border-[#E8D7CF] hover:border-[#884838] rounded-lg overflow-hidden cursor-zoom-in transition-colors"
+                            >
+                              <img
+                                src={item.src}
+                                alt={label}
+                                loading="lazy"
+                                decoding="async"
+                                className="w-full h-[128px] object-contain bg-[#FDF8F5] group-hover:scale-[1.03] transition-transform duration-300"
+                              />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleSelectServiceAndScroll('hair')}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#884838] hover:text-[#32241F] underline underline-offset-4 self-start pt-1 cursor-pointer"
+                    >
+                      <span>{t.specialtiesSection.consultCta}</span>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </button>
+                  </article>
+                );
+              })()}
+
+              {/* 3. Plastic & Aesthetic Surgery */}
+              {(() => {
+                const plasticCasesForCard = visibleCases.filter((c) => c.category === 'plastic');
+                return (
+                  <article className="flex flex-col gap-3.5 border border-[#E8D7CF] bg-white rounded-2xl p-6 shadow-[0_6px_18px_rgba(86,46,34,0.03)]">
+                    <div className="w-11 h-11 rounded-xl bg-[#F7EEEA] text-[#884838] grid place-items-center shrink-0">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6" aria-hidden="true">
+                        <path d="M12 3c-5 0-8 3-8 8v2c0 4 4 8 8 8s8-4 8-8v-2c0-5-3-8-8-8Zm-4 9h.01m8 0h.01M10 16c1.3 1 2.7 1 4 0" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-[#32241F] leading-snug">
+                      {t.specialtiesSection.plastic.title}
+                    </h3>
+
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-bold text-[#884838]">
+                        {t.specialtiesSection.plastic.faceTitle}
+                      </h4>
+                      <p className="text-sm text-[#69554E] leading-relaxed">
+                        {t.specialtiesSection.plastic.faceDesc}
+                      </p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-bold text-[#884838]">
+                        {t.specialtiesSection.plastic.bodyTitle}
+                      </h4>
+                      <p className="text-sm text-[#69554E] leading-relaxed">
+                        {t.specialtiesSection.plastic.bodyDesc}
+                      </p>
+                    </div>
+
+                    {plasticCasesForCard.length > 0 && (
+                      <div className="grid grid-cols-2 gap-2 mt-auto pt-2">
+                        {plasticCasesForCard.map((item) => {
+                          const globalIdx = visibleCases.findIndex((c) => c.id === item.id);
+                          const label = isRTL ? item.titleAr : item.titleEn;
+                          return (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => setLightboxIndex(globalIdx)}
+                              aria-label={`${t.specialtiesSection.enlargePrefix} ${label}`}
+                              className="group relative bg-[#FDF8F5] border border-[#E8D7CF] hover:border-[#884838] rounded-lg overflow-hidden cursor-zoom-in transition-colors"
+                            >
+                              <img
+                                src={item.src}
+                                alt={label}
+                                loading="lazy"
+                                decoding="async"
+                                className="w-full h-[148px] object-contain bg-[#FDF8F5] group-hover:scale-[1.03] transition-transform duration-300"
+                              />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleSelectServiceAndScroll('plastic')}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#884838] hover:text-[#32241F] underline underline-offset-4 self-start pt-1 cursor-pointer"
+                    >
+                      <span>{t.specialtiesSection.consultCta}</span>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </button>
+                  </article>
+                );
+              })()}
+
+              {/* 4. Spine Surgery & Spinal Disorders Treatment */}
+              {(() => {
+                const spineCasesForCard = visibleCases.filter((c) => c.category === 'spine');
+                return (
+                  <article className="flex flex-col gap-3.5 border border-[#E8D7CF] bg-white rounded-2xl p-6 shadow-[0_6px_18px_rgba(86,46,34,0.03)]">
+                    <div className="w-11 h-11 rounded-xl bg-[#F7EEEA] text-[#884838] grid place-items-center shrink-0">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6" aria-hidden="true">
+                        <path d="M12 2v3m0 14v3M10 7H8m6 0h2m-6 5H7m7 0h3m-7 5H8m6 0h2" />
+                        <rect x="10" y="5" width="4" height="4" rx="1" />
+                        <rect x="10" y="10" width="4" height="4" rx="1" />
+                        <rect x="10" y="15" width="4" height="4" rx="1" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-[#32241F] leading-snug">
+                      {t.specialtiesSection.spine.title}
+                    </h3>
+                    <p className="text-sm text-[#69554E] leading-relaxed">
+                      {t.specialtiesSection.spine.desc}
+                    </p>
+                    <p className="text-sm font-bold text-[#884838]">
+                      {t.specialtiesSection.spine.experience}
+                    </p>
+                    <ul className="list-disc ps-5 space-y-1 text-sm text-[#69554E] marker:text-[#884838]">
+                      {t.specialtiesSection.spine.offerings.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+
+                    {spineCasesForCard.length > 0 && (
+                      <div className="grid grid-cols-1 gap-2 mt-auto pt-2">
+                        {spineCasesForCard.map((item) => {
+                          const globalIdx = visibleCases.findIndex((c) => c.id === item.id);
+                          const label = isRTL ? item.titleAr : item.titleEn;
+                          return (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => setLightboxIndex(globalIdx)}
+                              aria-label={`${t.specialtiesSection.enlargePrefix} ${label}`}
+                              className="group relative bg-[#FDF8F5] border border-[#E8D7CF] hover:border-[#884838] rounded-lg overflow-hidden cursor-zoom-in transition-colors"
+                            >
+                              <img
+                                src={item.src}
+                                alt={label}
+                                loading="lazy"
+                                decoding="async"
+                                className="w-full h-[148px] object-contain bg-[#FDF8F5] group-hover:scale-[1.03] transition-transform duration-300"
+                              />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleSelectServiceAndScroll('spine')}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#884838] hover:text-[#32241F] underline underline-offset-4 self-start pt-1 cursor-pointer"
+                    >
+                      <span>{t.specialtiesSection.consultCta}</span>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </button>
+                  </article>
+                );
+              })()}
+            </div>
+          </section>
+
+          {/* =================================================================
+              SECTION 04 — PATIENT SUPPORT (4 ITEMS)
+          ================================================================== */}
+          <section
+            id="support"
+            aria-labelledby="support-heading"
+            className="bg-[#F7EEEA] py-14 sm:py-16 border-y border-[#E8D7CF] scroll-mt-20"
+          >
+            <div className="max-w-[1120px] mx-auto px-4 sm:px-8">
+              <h2
+                id="support-heading"
+                className="text-3xl sm:text-4xl font-extrabold text-[#32241F] tracking-tight text-center"
+              >
+                {t.support.heading}
+              </h2>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-7">
+                {t.support.items.map((item, idx) => (
+                  <article
+                    key={item.title}
+                    className="bg-[#FFFCFA] border border-[#E8D7CF] rounded-xl p-5 flex items-start gap-3.5"
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-[#F7EEEA] text-[#884838] grid place-items-center shrink-0">
+                      {idx === 0 && (
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
+                          <path d="m5 11 1.4-4.3A2 2 0 0 1 8.3 5h7.4a2 2 0 0 1 1.9 1.7L19 11M5 18v2m14-2v2M3 15a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v3H3v-3Zm4 0h2m6 0h2" />
+                        </svg>
+                      )}
+                      {idx === 1 && (
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
+                          <path d="M3 20v-9m18 9v-5a3 3 0 0 0-3-3h-6v5M3 17h18M7 12h2v5H5v-3a2 2 0 0 1 2-2ZM7 9V4h10v5" />
+                        </svg>
+                      )}
+                      {idx === 2 && <Globe className="w-5 h-5" strokeWidth={1.65} />}
+                      {idx === 3 && (
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
+                          <path d="M20 11a8 8 0 0 1-8 8H5l1.4-3.1A8 8 0 1 1 20 11Z" />
+                          <path d="m9 11 2 2 4-4" />
+                        </svg>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-[#32241F] leading-snug">
+                        {item.title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-[#69554E] mt-1.5 leading-relaxed">
+                        {item.desc}
+                      </p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* =================================================================
+              SECTION 05 — CONNECT WITH ESTELUX
+          ================================================================== */}
+          <section className="max-w-[1120px] mx-auto px-4 sm:px-8 py-12 text-center">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#32241F] tracking-tight">
+              {t.social.heading}
+            </h2>
+            <div className="flex flex-wrap items-center justify-center gap-3 mt-5">
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2.5 border border-[#E8D7CF] hover:bg-[#F7EEEA] px-4 py-2.5 min-h-[46px] rounded-xl text-[#884838] font-bold text-sm transition-colors"
+              >
+                <span className="w-7 h-7 rounded-lg grid place-items-center text-white bg-[radial-gradient(circle_at_24%_97%,#feda75,#fa7e1e_22%,#d62976_52%,#962fbf_76%,#4f5bd5)]">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="5" />
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M17.5 6.5h.01" />
+                  </svg>
+                </span>
+                <span>{t.social.instagram}</span>
+              </a>
+
+              <a
+                href={FACEBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2.5 border border-[#E8D7CF] hover:bg-[#F7EEEA] px-4 py-2.5 min-h-[46px] rounded-xl text-[#884838] font-bold text-sm transition-colors"
+              >
+                <span className="w-7 h-7 rounded-lg grid place-items-center text-white bg-[#0866FF]">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4" aria-hidden="true">
+                    <path d="M14 22v-9h3l.5-3H14V8c0-.9.3-1.5 1.6-1.5H18V3.8c-.5-.1-1.6-.3-2.8-.3-2.9 0-4.7 1.7-4.7 4.6V10H8v3h2.5v9Z" />
+                  </svg>
+                </span>
+                <span>{t.social.facebook}</span>
+              </a>
+
+              <a
+                href={defaultWaUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2.5 border border-[#E8D7CF] hover:bg-[#F7EEEA] px-4 py-2.5 min-h-[46px] rounded-xl text-[#884838] font-bold text-sm transition-colors"
+              >
+                <span className="w-7 h-7 rounded-lg grid place-items-center text-[#123D25] bg-[#25D366]">
+                  <MessageCircle className="w-4 h-4" />
+                </span>
+                <span>{t.social.whatsapp}</span>
+              </a>
+            </div>
+          </section>
+
+          {/* =================================================================
+              SECTION 06 — PATIENT REVIEWS (3 CLEAN CARDS)
+          ================================================================== */}
+          <section
+            id="reviews"
+            aria-labelledby="reviews-heading"
+            className="bg-[#F7EEEA] py-14 sm:py-16 border-t border-[#E8D7CF] scroll-mt-20"
+          >
+            <div className="max-w-[1120px] mx-auto px-4 sm:px-8">
+              <h2
+                id="reviews-heading"
+                className="text-3xl sm:text-4xl font-extrabold text-[#32241F] tracking-tight text-center"
+              >
+                {t.reviews.heading}
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-7">
+                {t.reviews.items.map((rev) => (
+                  <blockquote
+                    key={rev.cite}
+                    className="flex flex-col justify-between gap-4 bg-[#FFFCFA] border border-[#E8D7CF] rounded-xl p-6"
+                  >
+                    <p className="text-base sm:text-lg font-serif text-[#32241F] leading-relaxed">
+                      {rev.quote}
+                    </p>
+                    <cite className="not-italic text-sm font-medium text-[#69554E]">
+                      {rev.cite}
+                    </cite>
+                  </blockquote>
                 ))}
               </div>
             </div>
@@ -3629,15 +3460,15 @@ export function App() {
       {/* =====================================================================
           MINIMAL FOOTER
       ====================================================================== */}
-      <footer className="border-t border-[#E8C9C1] bg-[#FCF9F7] py-6 pb-20 sm:pb-6">
-        <div className="max-w-[1320px] mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#52443F]">
+      <footer className="border-t border-[#E8D7CF] bg-[#FFFCFA] py-6 pb-20 sm:pb-6">
+        <div className="max-w-[1120px] mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#69554E]">
           <div className="flex items-center gap-3">
-            <div className="bg-white border border-[#E8C9C1] rounded-lg px-2 py-1 shadow-2xs">
+            <a href="#top" className="inline-flex items-center gap-2.5">
               <img
-                src={brandLogo}
+                src={brandLogo === DEFAULT_ASSETS.logo ? '/estelux-emblem.png' : brandLogo}
                 alt="ESTELUX"
-                width={54}
-                height={42}
+                width={44}
+                height={46}
                 loading="lazy"
                 decoding="async"
                 onError={(e) => {
@@ -3645,8 +3476,14 @@ export function App() {
                 }}
                 className="h-9 w-auto object-contain block"
               />
-            </div>
-            <span className="font-semibold text-[#1C1918]">{t.footer.slogan}</span>
+              <span className="text-sm font-extrabold tracking-[0.24em] text-[#884838]">
+                ESTELUX
+              </span>
+            </a>
+            <span className="text-[#CDBBB2]" aria-hidden="true">
+              ·
+            </span>
+            <span className="font-semibold text-[#32241F]">{t.footer.location}</span>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4">
@@ -3654,9 +3491,9 @@ export function App() {
               href={defaultWaUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 font-semibold text-[#1C1918] hover:text-[#C47D6B]"
+              className="inline-flex items-center gap-1.5 font-semibold text-[#32241F] hover:text-[#884838]"
             >
-              <Phone className="w-3.5 h-3.5 text-[#C47D6B]" />
+              <Phone className="w-3.5 h-3.5 text-[#884838]" />
               <span>{t.footer.whatsappLabel}:</span>
               <span dir="ltr">{WHATSAPP_DISPLAY}</span>
             </a>
@@ -3664,26 +3501,12 @@ export function App() {
             <button
               type="button"
               onClick={() => setPrivacyOpen(true)}
-              className="underline underline-offset-4 hover:text-[#1C1918] cursor-pointer"
+              className="underline underline-offset-4 hover:text-[#32241F] cursor-pointer"
             >
               {t.footer.privacy}
             </button>
 
             <span>{t.footer.rights}</span>
-
-            <span className="text-[#CDBBB2]" aria-hidden="true">
-              •
-            </span>
-
-            <a
-              href="https://threedigitsoftware.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-[#5A4E4A] hover:text-[#C47D6B] transition-colors"
-            >
-              {isRTL ? 'تطوير: ' : 'Powered by '}
-              <span className="underline underline-offset-4">Threedigitsoftware.com</span>
-            </a>
           </div>
         </div>
       </footer>
@@ -3828,7 +3651,7 @@ export function App() {
                   onClick={() => {
                     const cat = filteredCases[lightboxIndex].category;
                     setLightboxIndex(null);
-                    handleSelectServiceAndScroll(cat === 'hollywood' ? 'hollywood' : 'zirconia');
+                    handleSelectServiceAndScroll(cat);
                   }}
                   className="px-4 py-2 rounded-xl bg-[#9A4F3E] hover:bg-[#7D3D2E] text-white text-xs font-bold cursor-pointer"
                 >
