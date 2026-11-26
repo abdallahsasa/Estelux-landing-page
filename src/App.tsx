@@ -97,10 +97,10 @@ interface ConsultationLead {
   langSubmitted: Language;
 }
 
-const WHATSAPP_DISPLAY = '+90 544 455 5513';
-const WHATSAPP_RAW = '905444555513';
-const INSTAGRAM_URL = 'https://www.instagram.com/esteluxclinic/';
-const FACEBOOK_URL = 'https://www.facebook.com/clinicestelux';
+const WHATSAPP_DISPLAY = '+90 555 056 55 52';
+const WHATSAPP_RAW = '905550565552';
+const INSTAGRAM_URL = 'https://www.instagram.com/estelux_tr';
+const FACEBOOK_URL = 'https://www.facebook.com/esteluxtr';
 const ENV_ADMIN_PIN = (import.meta.env.VITE_ADMIN_PIN || '').trim();
 
 const STORAGE_KEYS = {
@@ -1533,8 +1533,7 @@ export function App() {
   };
 
   const fieldClass = (hasError?: boolean) =>
-    `w-full min-h-[44px] px-3.5 rounded-xl border bg-[#FFFCFA] text-sm text-[#32241F] placeholder:text-[#A8968F] transition-colors focus:outline-none focus:bg-white focus:border-[#884838] focus:ring-2 focus:ring-[#884838]/15 ${
-      hasError ? 'border-red-500' : 'border-[#E0CCC3] hover:border-[#C9A99D]'
+    `w-full min-h-[44px] px-3.5 rounded-xl border bg-[#FFFCFA] text-sm text-[#32241F] placeholder:text-[#A8968F] transition-colors focus:outline-none focus:bg-white focus:border-[#884838] focus:ring-2 focus:ring-[#884838]/15 ${hasError ? 'border-red-500' : 'border-[#E0CCC3] hover:border-[#C9A99D]'
     }`;
   const labelClass = 'block text-[12.5px] font-semibold text-[#4A3530] mb-1.5';
   const sectionNumber = (n: number) => (isRTL ? toArabicDigits(`0${n}`) : `0${n}`);
@@ -2915,11 +2914,10 @@ export function App() {
                               type="button"
                               aria-pressed={selectedTimeline === tl.value}
                               onClick={() => setSelectedTimeline(tl.value)}
-                              className={`min-h-[38px] px-2 rounded-lg text-[13px] font-semibold transition-all cursor-pointer ${
-                                selectedTimeline === tl.value
+                              className={`min-h-[38px] px-2 rounded-lg text-[13px] font-semibold transition-all cursor-pointer ${selectedTimeline === tl.value
                                   ? 'bg-[#884838] text-white shadow-sm'
                                   : 'text-[#5A4640] hover:bg-white/80'
-                              }`}
+                                }`}
                             >
                               {tl.label}
                             </button>
@@ -3162,15 +3160,16 @@ export function App() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <h4 className="text-[13px] font-bold uppercase tracking-wider text-[#884838] mb-1">
-                              {s.plastic.faceTitle}
-                            </h4>
-                            <p>{s.plastic.faceDesc}</p>
-                          </div>
-                          <div>
-                            <h4 className="text-[13px] font-bold uppercase tracking-wider text-[#884838] mb-1">
                               {s.plastic.bodyTitle}
                             </h4>
                             <p>{s.plastic.bodyDesc}</p>
+                          </div>
+                          <div>
+                            <h4 className="text-[13px] font-bold uppercase tracking-wider text-[#884838] mb-1">
+                              {s.plastic.faceTitle}
+                            </h4>
+                            <p>{s.plastic.faceDesc}</p>
+
                           </div>
                         </div>
                       )}
