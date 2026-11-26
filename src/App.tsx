@@ -47,7 +47,11 @@ import {
   Stethoscope,
   HeartHandshake,
   BadgeCheck,
-  Menu
+  Menu,
+  Car,
+  BedDouble,
+  Languages,
+  Quote
 } from 'lucide-react';
 
 /**
@@ -352,6 +356,7 @@ const TRANSLATIONS = {
       returnToAdmin: 'Coordinator Mode Active — Return to Control Center',
     },
     hero: {
+      eyebrow: 'ESTELUX · Istanbul',
       title: 'Premium Medical Treatments in Istanbul',
       sloganLeft: 'Live Healthy',
       sloganRight: 'Look Beautiful',
@@ -361,6 +366,12 @@ const TRANSLATIONS = {
       whatsappPrefill:
         'Hello Estelux, I would like to request a free consultation regarding medical treatments in Istanbul.',
       casePrefix: 'Case #',
+      quickLinks: [
+        { id: 'dental' as SpecialtyCategory, label: 'Dental Aesthetics' },
+        { id: 'hair' as SpecialtyCategory, label: 'Hair Transplant' },
+        { id: 'plastic' as SpecialtyCategory, label: 'Plastic Surgery' },
+        { id: 'spine' as SpecialtyCategory, label: 'Spine Surgery' },
+      ],
     },
     specialtiesSection: {
       heading: 'Our Medical Services',
@@ -629,6 +640,7 @@ const TRANSLATIONS = {
       returnToAdmin: 'وضع الإدارة نشط — العودة إلى لوحة التحكم',
     },
     hero: {
+      eyebrow: 'إيستالوكس · إسطنبول',
       title: 'رعاية طبية متميّزة في إسطنبول',
       sloganLeft: 'عِش بصحّة',
       sloganRight: 'تألّق بجمالك',
@@ -638,6 +650,12 @@ const TRANSLATIONS = {
       whatsappPrefill:
         'مرحباً إيستالوكس، أرغب في طلب استشارة مجانية بخصوص العلاجات الطبية في إسطنبول.',
       casePrefix: 'حالة رقم ',
+      quickLinks: [
+        { id: 'dental' as SpecialtyCategory, label: 'تجميل الأسنان' },
+        { id: 'hair' as SpecialtyCategory, label: 'زراعة الشعر' },
+        { id: 'plastic' as SpecialtyCategory, label: 'جراحات التجميل' },
+        { id: 'spine' as SpecialtyCategory, label: 'جراحة العمود الفقري' },
+      ],
     },
     specialtiesSection: {
       heading: 'خدماتنا الطبية',
@@ -891,8 +909,48 @@ const TRANSLATIONS = {
 const toArabicDigits = (num: number | string) =>
   String(num).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
 
+const SpecialtyIcon = ({
+  category,
+  className = 'w-6 h-6',
+}: {
+  category: SpecialtyCategory;
+  className?: string;
+}) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    {category === 'dental' && (
+      <path d="M12 4c-2-1-3-2-5-1C2 4 3 10 5 13c1 2 1 8 4 8 2 0 1-7 3-7s1 7 3 7c3 0 3-6 4-8 2-3 3-9-2-10-2-.4-3 .5-5 1Z" />
+    )}
+    {category === 'hair' && <path d="M3 20h18M7 17c0-6 2-10 7-14M12 17c0-4 2-8 6-10M17 17c0-2 1-4 3-5" />}
+    {category === 'plastic' && (
+      <path d="M12 3c-5 0-8 3-8 8v2c0 4 4 8 8 8s8-4 8-8v-2c0-5-3-8-8-8Zm-4 9h.01m8 0h.01M10 16c1.3 1 2.7 1 4 0" />
+    )}
+    {category === 'spine' && (
+      <>
+        <path d="M12 2v3m0 14v3M10 7H8m6 0h2m-6 5H7m7 0h3m-7 5H8m6 0h2" />
+        <rect x="10" y="5" width="4" height="4" rx="1" />
+        <rect x="10" y="10" width="4" height="4" rx="1" />
+        <rect x="10" y="15" width="4" height="4" rx="1" />
+      </>
+    )}
+  </svg>
+);
+
+const SUPPORT_ICONS = [Car, BedDouble, Languages, HeartHandshake];
+
 export function App() {
-  const [lang, setLang] = useState<Language>('en');
+  const [lang, setLang] = useState<Language>(() => {
+    if (typeof window === 'undefined') return 'en';
+    return new URLSearchParams(window.location.search).get('lang') === 'ar' ? 'ar' : 'en';
+  });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isSecretAdminUrl = () => {
@@ -1472,6 +1530,52 @@ export function App() {
     } catch {
       return iso;
     }
+  };
+
+  const fieldClass = (hasError?: boolean) =>
+    `w-full min-h-[44px] px-3.5 rounded-xl border bg-[#FFFCFA] text-sm text-[#32241F] placeholder:text-[#A8968F] transition-colors focus:outline-none focus:bg-white focus:border-[#884838] focus:ring-2 focus:ring-[#884838]/15 ${
+      hasError ? 'border-red-500' : 'border-[#E0CCC3] hover:border-[#C9A99D]'
+    }`;
+  const labelClass = 'block text-[12.5px] font-semibold text-[#4A3530] mb-1.5';
+  const sectionNumber = (n: number) => (isRTL ? toArabicDigits(`0${n}`) : `0${n}`);
+
+  const renderCaseThumbs = (category: SpecialtyCategory, colsClass: string, heightClass: string) => {
+    const items = visibleCases.filter((c) => c.category === category);
+    if (items.length === 0) return null;
+    return (
+      <div className={`grid ${colsClass} gap-2.5`}>
+        {items.map((item) => {
+          const globalIdx = visibleCases.findIndex((c) => c.id === item.id);
+          const label = isRTL ? item.titleAr : item.titleEn;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setLightboxIndex(globalIdx)}
+              aria-label={`${t.specialtiesSection.enlargePrefix} ${label}`}
+              title={label}
+              className="group relative bg-[#FBF5F2] border border-[#EADBD3] hover:border-[#B27262] rounded-xl overflow-hidden cursor-zoom-in transition-colors"
+            >
+              <img
+                src={item.src}
+                alt={label}
+                loading="lazy"
+                decoding="async"
+                className={`w-full ${heightClass} object-contain transition-transform duration-500 ease-out group-hover:scale-[1.06]`}
+              />
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 grid place-items-center bg-[#32241F]/0 group-hover:bg-[#32241F]/30 transition-colors duration-300"
+              >
+                <span className="w-9 h-9 rounded-full bg-white/95 text-[#884838] grid place-items-center shadow-md opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300">
+                  <ZoomIn className="w-4 h-4" />
+                </span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    );
   };
 
   return (
@@ -2659,798 +2763,600 @@ export function App() {
       {view === 'landing' && (
         <main>
           {/* =================================================================
-              SECTION 01 — HERO
+              SECTION 01 — HERO + CONSULTATION FORM (ABOVE THE FOLD)
           ================================================================== */}
           <section
             aria-labelledby="main-heading"
-            className="bg-[#F7EEEA] py-12 sm:py-16 border-b border-[#E8D7CF]"
+            className="relative overflow-hidden bg-gradient-to-b from-[#F7EEEA] via-[#FAF3EF] to-[#FFFCFA] border-b border-[#EADBD3]"
           >
-            <div className="max-w-[1120px] mx-auto px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-              <div className="lg:col-span-7 space-y-5">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -top-40 -end-40 w-[520px] h-[520px] rounded-full bg-[radial-gradient(circle,rgba(178,114,98,0.16),transparent_65%)]"
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -bottom-48 -start-40 w-[480px] h-[480px] rounded-full bg-[radial-gradient(circle,rgba(136,72,56,0.08),transparent_65%)]"
+            />
+
+            <div className="relative max-w-[1200px] mx-auto px-4 sm:px-8 py-10 sm:py-14 lg:py-16 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+              {/* LEFT: Brand story */}
+              <div className="lg:col-span-5 space-y-6">
+                <div className="inline-flex items-center gap-2.5 ps-1.5 pe-4 py-1.5 rounded-full bg-white/70 border border-[#EADBD3] backdrop-blur-sm">
+                  <span className="w-7 h-7 rounded-full bg-[#884838] grid place-items-center">
+                    <img
+                      src="/client-logo.webp"
+                      alt=""
+                      className="w-4 h-4 object-contain brightness-0 invert"
+                    />
+                  </span>
+                  <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#884838]">
+                    {t.hero.eyebrow}
+                  </span>
+                </div>
+
                 <h1
                   id="main-heading"
-                  className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#32241F] leading-[1.08] tracking-tight"
+                  className="font-editorial text-[2.6rem] sm:text-5xl xl:text-[3.6rem] font-semibold text-[#32241F] leading-[1.06] tracking-tight"
                 >
                   {t.hero.title}
                 </h1>
 
-                <p className="text-xl sm:text-2xl font-serif text-[#884838] font-medium">
-                  <span>{t.hero.sloganLeft}</span>{' '}
-                  <span className="whitespace-nowrap mx-1.5" aria-hidden="true">
-                    · · ·
-                  </span>{' '}
+                <p className="font-editorial italic text-xl sm:text-2xl text-[#884838] flex items-center gap-3">
+                  <span>{t.hero.sloganLeft}</span>
+                  <span aria-hidden="true" className="h-px w-8 bg-[#B27262]/60" />
                   <span>{t.hero.sloganRight}</span>
                 </p>
 
-                <p className="text-sm sm:text-base text-[#69554E] leading-relaxed max-w-[54ch]">
+                <p className="text-[15px] text-[#69554E] leading-relaxed max-w-[46ch]">
                   {t.hero.lead}
                 </p>
 
-                <div className="flex flex-wrap items-center gap-3 pt-2">
-                  <a
-                    href="#consultation"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleSelectServiceAndScroll(selectedServiceValue);
-                    }}
-                    className="inline-flex items-center justify-center gap-2 min-h-[48px] px-6 py-3 rounded-xl bg-[#884838] hover:bg-[#6A382D] text-white font-bold text-sm shadow-sm transition-colors whitespace-nowrap"
-                  >
-                    <span>{t.hero.primaryCta}</span>
-                    {isRTL ? (
-                      <ArrowLeft className="w-4 h-4 shrink-0" />
-                    ) : (
-                      <ArrowRight className="w-4 h-4 shrink-0" />
-                    )}
-                  </a>
+                {/* Specialty quick links */}
+                <div className="grid grid-cols-2 gap-2.5 max-w-md">
+                  {t.hero.quickLinks.map((link) => (
+                    <a
+                      key={link.id}
+                      href="#services"
+                      className="group flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/80 border border-[#EADBD3] hover:border-[#B27262] hover:bg-white transition-colors"
+                    >
+                      <span className="w-8 h-8 rounded-lg bg-[#F7EEEA] text-[#884838] grid place-items-center shrink-0 group-hover:bg-[#884838] group-hover:text-white transition-colors">
+                        <SpecialtyIcon category={link.id} className="w-[18px] h-[18px]" />
+                      </span>
+                      <span className="text-[13px] font-semibold text-[#32241F] leading-tight">
+                        {link.label}
+                      </span>
+                    </a>
+                  ))}
+                </div>
 
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-3 pt-1">
                   <a
                     href={defaultWaUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 min-h-[48px] px-5 py-3 rounded-xl bg-[#157A3E] hover:bg-[#106231] text-white font-bold text-sm shadow-sm transition-colors whitespace-nowrap"
+                    className="inline-flex items-center gap-2 min-h-[46px] px-5 rounded-xl bg-[#157A3E] hover:bg-[#106231] text-white font-bold text-sm shadow-sm transition-colors"
                   >
-                    <MessageCircle className="w-4 h-4 shrink-0" />
+                    <MessageCircle className="w-4 h-4" />
                     <span>{t.hero.whatsappCta}</span>
+                  </a>
+                  <a
+                    href={defaultWaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    dir="ltr"
+                    className="text-sm font-semibold text-[#32241F] hover:text-[#884838] transition-colors"
+                  >
+                    {WHATSAPP_DISPLAY}
                   </a>
                 </div>
               </div>
 
-              <div className="hidden lg:grid lg:col-span-5 place-items-center" aria-hidden="true">
-                <div className="relative w-full max-w-[420px] aspect-[1.16] rounded-t-[49%] rounded-b-xl bg-[radial-gradient(ellipse_at_65%_18%,#A76150,#783D31)] border border-[#AB6C59] grid place-items-center overflow-hidden shadow-md">
-                  <div className="absolute inset-[5%] border border-[#F7DED4]/30 rounded-[inherit] pointer-events-none" />
-                  <div className="absolute inset-[9%] border border-[#F7DED4]/25 rounded-[inherit] pointer-events-none" />
-                  <img
-                    src={heroPhoto || '/client-logo.webp'}
-                    alt=""
-                    width={450}
-                    height={362}
-                    onError={(e) => {
-                      e.currentTarget.src = '/client-logo.webp';
-                    }}
-                    className="w-[69%] h-auto object-contain brightness-0 invert-[93%] sepia-[12%] saturate-[380%] opacity-90"
+              {/* RIGHT: Consultation form */}
+              <div className="lg:col-span-7">
+                <div
+                  id="consultation"
+                  className="relative bg-white rounded-3xl border border-[#EADBD3] shadow-[0_24px_60px_-20px_rgba(86,46,34,0.18)] p-6 sm:p-8 scroll-mt-24"
+                >
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-x-8 top-0 h-[3px] rounded-b-full bg-gradient-to-r from-[#B27262] via-[#884838] to-[#B27262]"
                   />
+
+                  <div className="mb-5">
+                    <h2
+                      id="form-heading"
+                      className="font-editorial text-2xl sm:text-[1.9rem] font-semibold text-[#32241F] tracking-tight"
+                    >
+                      {t.form.heading}
+                    </h2>
+                    <p className="mt-1.5 text-[13.5px] text-[#69554E] leading-relaxed">
+                      {t.form.intro}
+                    </p>
+                  </div>
+
+                  {submitted && lastSubmittedLead ? (
+                    <div className="p-6 rounded-2xl bg-[#FBF7F4] border border-[#EADBD3] space-y-4">
+                      <div className="flex items-center gap-2.5 text-[#0F6934] font-bold text-base">
+                        <CheckCircle2 className="w-5 h-5 shrink-0" />
+                        <span>{t.form.confirmTitle}</span>
+                      </div>
+                      <p className="text-sm text-[#4A3F3B] leading-relaxed">{t.form.confirmBody}</p>
+                      <div className="flex flex-wrap items-center gap-4">
+                        <a
+                          href={buildWhatsAppLinkFromLead(lastSubmittedLead)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="min-h-[46px] inline-flex items-center gap-2 px-5 rounded-xl bg-[#157A3E] hover:bg-[#106231] text-white font-bold text-sm transition-colors"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          <span>{t.form.confirmWaBtn}</span>
+                          <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSubmitted(false);
+                            setLastSubmittedLead(null);
+                          }}
+                          className="text-xs font-bold text-[#884838] underline underline-offset-4 cursor-pointer"
+                        >
+                          {t.form.resetBtn}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleSubmit} noValidate className="space-y-4">
+                      <fieldset className="min-w-0">
+                        <legend className={labelClass}>{t.form.timelineLabel}</legend>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 rounded-xl bg-[#F7EEEA]/70 border border-[#EADBD3]">
+                          {t.form.timelines.map((tl) => (
+                            <button
+                              key={tl.value}
+                              type="button"
+                              aria-pressed={selectedTimeline === tl.value}
+                              onClick={() => setSelectedTimeline(tl.value)}
+                              className={`min-h-[38px] px-2 rounded-lg text-[13px] font-semibold transition-all cursor-pointer ${
+                                selectedTimeline === tl.value
+                                  ? 'bg-[#884838] text-white shadow-sm'
+                                  : 'text-[#5A4640] hover:bg-white/80'
+                              }`}
+                            >
+                              {tl.label}
+                            </button>
+                          ))}
+                        </div>
+                      </fieldset>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
+                        <div>
+                          <label htmlFor="full-name" className={labelClass}>
+                            {t.form.fullName} <span className="text-[#B27262]">*</span>
+                          </label>
+                          <input
+                            ref={fullNameInputRef}
+                            id="full-name"
+                            type="text"
+                            autoComplete="name"
+                            value={fullName}
+                            onChange={(e) => {
+                              setFullName(e.target.value);
+                              if (errors.name) setErrors({ ...errors, name: '' });
+                            }}
+                            placeholder={t.form.fullNamePlaceholder}
+                            className={fieldClass(!!errors.name)}
+                          />
+                          {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name}</p>}
+                        </div>
+
+                        <div>
+                          <label htmlFor="country" className={labelClass}>
+                            {t.form.country} <span className="text-[#B27262]">*</span>
+                          </label>
+                          <input
+                            id="country"
+                            type="text"
+                            autoComplete="country-name"
+                            value={country}
+                            onChange={(e) => {
+                              setCountry(e.target.value);
+                              if (errors.country) setErrors({ ...errors, country: '' });
+                            }}
+                            placeholder={t.form.countryPlaceholder}
+                            className={fieldClass(!!errors.country)}
+                          />
+                          {errors.country && <p className="mt-1 text-xs text-red-600">{errors.country}</p>}
+                        </div>
+
+                        <div>
+                          <label htmlFor="whatsapp-phone" className={labelClass}>
+                            {t.form.whatsapp} <span className="text-[#B27262]">*</span>
+                          </label>
+                          <div className="flex gap-2" dir="ltr">
+                            <select
+                              aria-label={t.form.countryCodeAria}
+                              value={countryCode}
+                              onChange={(e) => setCountryCode(e.target.value)}
+                              className="w-[92px] shrink-0 min-h-[44px] px-2 rounded-xl border border-[#E0CCC3] bg-[#FBF5F2] text-xs font-bold text-[#32241F] focus:outline-none focus:border-[#884838] focus:ring-2 focus:ring-[#884838]/15"
+                            >
+                              {COUNTRY_CODES.map((c) => (
+                                <option key={c.id} value={c.code}>
+                                  {c.flag} {c.code}
+                                </option>
+                              ))}
+                            </select>
+                            <input
+                              id="whatsapp-phone"
+                              type="tel"
+                              autoComplete="tel"
+                              value={phone}
+                              onChange={(e) => {
+                                setPhone(e.target.value);
+                                if (errors.phone) setErrors({ ...errors, phone: '' });
+                              }}
+                              placeholder={t.form.whatsappPlaceholder}
+                              className={`${fieldClass(!!errors.phone)} flex-1 min-w-0`}
+                            />
+                          </div>
+                          {errors.phone && <p className="mt-1 text-xs text-red-600">{errors.phone}</p>}
+                        </div>
+
+                        <div>
+                          <label htmlFor="interested-service" className={labelClass}>
+                            {t.form.serviceLabel} <span className="text-[#B27262]">*</span>
+                          </label>
+                          <select
+                            id="interested-service"
+                            value={selectedServiceValue}
+                            onChange={(e) => {
+                              setSelectedServiceValue(e.target.value);
+                              if (errors.service) setErrors({ ...errors, service: '' });
+                            }}
+                            className={`${fieldClass(!!errors.service)} ${selectedServiceValue ? '' : 'text-[#A8968F]'}`}
+                          >
+                            <option value="" disabled>
+                              {t.form.servicePlaceholder}
+                            </option>
+                            {t.form.services.map((srv) => (
+                              <option key={srv.value} value={srv.value} className="text-[#32241F]">
+                                {srv.label}
+                              </option>
+                            ))}
+                          </select>
+                          {errors.service && <p className="mt-1 text-xs text-red-600">{errors.service}</p>}
+                        </div>
+
+                        <div>
+                          <label htmlFor="arrival-date" className={labelClass}>
+                            {t.form.arrivalDate}
+                          </label>
+                          <input
+                            id="arrival-date"
+                            type="date"
+                            value={arrivalDate}
+                            onChange={(e) => setArrivalDate(e.target.value)}
+                            className={fieldClass()}
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="email-address" className={labelClass}>
+                            {t.form.email}
+                          </label>
+                          <input
+                            id="email-address"
+                            type="email"
+                            autoComplete="email"
+                            value={email}
+                            onChange={(e) => {
+                              setEmail(e.target.value);
+                              if (errors.email) setErrors({ ...errors, email: '' });
+                            }}
+                            placeholder={t.form.emailPlaceholder}
+                            className={fieldClass(!!errors.email)}
+                          />
+                          {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
+                        </div>
+
+                        <div className="sm:col-span-2">
+                          <label htmlFor="treatment-notes" className={labelClass}>
+                            {t.form.message}
+                          </label>
+                          <textarea
+                            id="treatment-notes"
+                            rows={2}
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            placeholder={t.form.messagePlaceholder}
+                            className={`${fieldClass()} py-2.5 resize-y`}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="pt-1 space-y-3.5">
+                        <div>
+                          <label className="flex items-start gap-2.5 text-[13px] text-[#69554E] cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={consent}
+                              onChange={(e) => {
+                                setConsent(e.target.checked);
+                                if (errors.consent) setErrors({ ...errors, consent: '' });
+                              }}
+                              className="mt-0.5 h-4 w-4 accent-[#884838] shrink-0"
+                            />
+                            <span>{t.form.consent}</span>
+                          </label>
+                          {errors.consent && <p className="mt-1 text-xs text-red-600">{errors.consent}</p>}
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={submitting}
+                          className="w-full min-h-[50px] inline-flex items-center justify-center gap-2 px-6 rounded-xl bg-[#884838] hover:bg-[#6A382D] disabled:opacity-60 text-white font-bold text-[15px] shadow-[0_10px_24px_-10px_rgba(136,72,56,0.6)] transition-colors cursor-pointer"
+                        >
+                          {submitting ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span>{t.form.submitting}</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>{t.form.submit}</span>
+                              {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </form>
+                  )}
                 </div>
               </div>
             </div>
           </section>
 
           {/* =================================================================
-              SECTION 02 — FREE CONSULTATION FORM
-          ================================================================== */}
-          <section className="max-w-[1120px] mx-auto px-4 sm:px-8 pt-10">
-            <div
-              id="consultation"
-              className="bg-white border border-[#E8D7CF] rounded-2xl p-6 sm:p-9 shadow-[0_12px_26px_rgba(86,46,34,0.04)] scroll-mt-24"
-            >
-              <h2
-                id="form-heading"
-                className="text-2xl sm:text-3xl font-extrabold text-[#32241F] tracking-tight"
-              >
-                {t.form.heading}
-              </h2>
-              <p className="mt-1.5 mb-6 text-sm text-[#69554E] leading-relaxed">
-                {t.form.intro}
-              </p>
-
-              {submitted && lastSubmittedLead ? (
-                <div className="p-5 sm:p-6 rounded-2xl bg-[#FCF9F7] border border-[#E8D7CF] space-y-4">
-                  <div className="flex items-center gap-2 text-[#0F6934] font-extrabold text-base">
-                    <CheckCircle2 className="w-5 h-5 shrink-0" />
-                    <span>{t.form.confirmTitle}</span>
-                  </div>
-                  <p className="text-sm text-[#4A3F3B] leading-relaxed">
-                    {t.form.confirmBody}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <a
-                      href={buildWhatsAppLinkFromLead(lastSubmittedLead)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="min-h-[46px] inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#157A3E] hover:bg-[#106231] text-white font-bold text-sm transition-colors"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      <span>{t.form.confirmWaBtn}</span>
-                      <ExternalLink className="w-3.5 h-3.5 opacity-80" />
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSubmitted(false);
-                        setLastSubmittedLead(null);
-                      }}
-                      className="text-xs font-bold text-[#884838] underline underline-offset-4 cursor-pointer"
-                    >
-                      {t.form.resetBtn}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} noValidate className="space-y-5">
-                  {/* Travel Window Selector */}
-                  <fieldset className="border-0 p-0 m-0">
-                    <legend className="text-sm font-bold text-[#32241F] mb-2">
-                      {t.form.timelineLabel}
-                    </legend>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {t.form.timelines.map((tl) => (
-                        <button
-                          key={tl.value}
-                          type="button"
-                          onClick={() => setSelectedTimeline(tl.value)}
-                          className={`min-h-[44px] px-3 py-2 rounded-lg text-sm font-bold border transition-all cursor-pointer text-center ${
-                            selectedTimeline === tl.value
-                              ? 'bg-[#884838] text-white border-[#884838]'
-                              : 'bg-white text-[#32241F] border-[#CBB3A9] hover:border-[#884838]'
-                          }`}
-                        >
-                          {tl.label}
-                        </button>
-                      ))}
-                    </div>
-                  </fieldset>
-
-                  {/* Form Fields Grid (3 columns on desktop, matching client layout) */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Full Name */}
-                    <div>
-                      <label
-                        htmlFor="full-name"
-                        className="block text-sm font-bold text-[#32241F] mb-1.5"
-                      >
-                        {t.form.fullName} *
-                      </label>
-                      <input
-                        ref={fullNameInputRef}
-                        id="full-name"
-                        type="text"
-                        autoComplete="name"
-                        value={fullName}
-                        onChange={(e) => {
-                          setFullName(e.target.value);
-                          if (errors.name) setErrors({ ...errors, name: '' });
-                        }}
-                        placeholder={t.form.fullNamePlaceholder}
-                        className={`w-full min-h-[47px] px-3.5 rounded-lg border bg-white text-sm text-[#32241F] placeholder:text-[#8E7F7A] focus:outline-none focus:ring-2 focus:ring-[#884838] ${
-                          errors.name ? 'border-red-600' : 'border-[#CBB3A9]'
-                        }`}
-                      />
-                      {errors.name && (
-                        <p className="mt-1 text-xs text-red-700">{errors.name}</p>
-                      )}
-                    </div>
-
-                    {/* Country of Residence */}
-                    <div>
-                      <label
-                        htmlFor="country"
-                        className="block text-sm font-bold text-[#32241F] mb-1.5"
-                      >
-                        {t.form.country} *
-                      </label>
-                      <input
-                        id="country"
-                        type="text"
-                        autoComplete="country-name"
-                        value={country}
-                        onChange={(e) => {
-                          setCountry(e.target.value);
-                          if (errors.country) setErrors({ ...errors, country: '' });
-                        }}
-                        placeholder={t.form.countryPlaceholder}
-                        className={`w-full min-h-[47px] px-3.5 rounded-lg border bg-white text-sm text-[#32241F] placeholder:text-[#8E7F7A] focus:outline-none focus:ring-2 focus:ring-[#884838] ${
-                          errors.country ? 'border-red-600' : 'border-[#CBB3A9]'
-                        }`}
-                      />
-                      {errors.country && (
-                        <p className="mt-1 text-xs text-red-700">{errors.country}</p>
-                      )}
-                    </div>
-
-                    {/* WhatsApp Number */}
-                    <div>
-                      <label
-                        htmlFor="whatsapp-phone"
-                        className="block text-sm font-bold text-[#32241F] mb-1.5"
-                      >
-                        {t.form.whatsapp} *
-                      </label>
-                      <div className="flex gap-1.5" dir="ltr">
-                        <select
-                          aria-label={t.form.countryCodeAria}
-                          value={countryCode}
-                          onChange={(e) => setCountryCode(e.target.value)}
-                          className="w-[96px] shrink-0 min-h-[47px] px-2 rounded-lg border border-[#CBB3A9] bg-[#FCF9F7] text-xs font-bold text-[#32241F] focus:outline-none focus:ring-2 focus:ring-[#884838]"
-                        >
-                          {COUNTRY_CODES.map((c) => (
-                            <option key={c.id} value={c.code}>
-                              {c.flag} {c.code}
-                            </option>
-                          ))}
-                        </select>
-                        <input
-                          id="whatsapp-phone"
-                          type="tel"
-                          autoComplete="tel"
-                          value={phone}
-                          onChange={(e) => {
-                            setPhone(e.target.value);
-                            if (errors.phone) setErrors({ ...errors, phone: '' });
-                          }}
-                          placeholder={t.form.whatsappPlaceholder}
-                          className={`flex-1 min-w-0 min-h-[47px] px-3 rounded-lg border bg-white text-sm text-[#32241F] placeholder:text-[#8E7F7A] focus:outline-none focus:ring-2 focus:ring-[#884838] ${
-                            errors.phone ? 'border-red-600' : 'border-[#CBB3A9]'
-                          }`}
-                        />
-                      </div>
-                      {errors.phone && (
-                        <p className="mt-1 text-xs text-red-700">{errors.phone}</p>
-                      )}
-                    </div>
-
-                    {/* Treatment of Interest */}
-                    <div>
-                      <label
-                        htmlFor="interested-service"
-                        className="block text-sm font-bold text-[#32241F] mb-1.5"
-                      >
-                        {t.form.serviceLabel} *
-                      </label>
-                      <select
-                        id="interested-service"
-                        value={selectedServiceValue}
-                        onChange={(e) => {
-                          setSelectedServiceValue(e.target.value);
-                          if (errors.service) setErrors({ ...errors, service: '' });
-                        }}
-                        className={`w-full min-h-[47px] px-3 rounded-lg border bg-white text-sm text-[#32241F] focus:outline-none focus:ring-2 focus:ring-[#884838] ${
-                          errors.service ? 'border-red-600' : 'border-[#CBB3A9]'
-                        }`}
-                      >
-                        <option value="" disabled>
-                          {t.form.servicePlaceholder}
-                        </option>
-                        {t.form.services.map((srv) => (
-                          <option key={srv.value} value={srv.value}>
-                            {srv.label}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.service && (
-                        <p className="mt-1 text-xs text-red-700">{errors.service}</p>
-                      )}
-                    </div>
-
-                    {/* Expected Arrival Date (optional) */}
-                    <div>
-                      <label
-                        htmlFor="arrival-date"
-                        className="block text-sm font-bold text-[#32241F] mb-1.5"
-                      >
-                        {t.form.arrivalDate}
-                      </label>
-                      <input
-                        id="arrival-date"
-                        type="date"
-                        value={arrivalDate}
-                        onChange={(e) => setArrivalDate(e.target.value)}
-                        className="w-full min-h-[47px] px-3.5 rounded-lg border border-[#CBB3A9] bg-white text-sm text-[#32241F] focus:outline-none focus:ring-2 focus:ring-[#884838]"
-                      />
-                    </div>
-
-                    {/* Email Address (optional) */}
-                    <div>
-                      <label
-                        htmlFor="email-address"
-                        className="block text-sm font-bold text-[#32241F] mb-1.5"
-                      >
-                        {t.form.email}
-                      </label>
-                      <input
-                        id="email-address"
-                        type="email"
-                        autoComplete="email"
-                        value={email}
-                        onChange={(e) => {
-                          setEmail(e.target.value);
-                          if (errors.email) setErrors({ ...errors, email: '' });
-                        }}
-                        placeholder={t.form.emailPlaceholder}
-                        className={`w-full min-h-[47px] px-3.5 rounded-lg border bg-white text-sm text-[#32241F] placeholder:text-[#8E7F7A] focus:outline-none focus:ring-2 focus:ring-[#884838] ${
-                          errors.email ? 'border-red-600' : 'border-[#CBB3A9]'
-                        }`}
-                      />
-                      {errors.email && (
-                        <p className="mt-1 text-xs text-red-700">{errors.email}</p>
-                      )}
-                    </div>
-
-                    {/* Treatment Goals or Questions (optional) */}
-                    <div className="md:col-span-3">
-                      <label
-                        htmlFor="treatment-notes"
-                        className="block text-sm font-bold text-[#32241F] mb-1.5"
-                      >
-                        {t.form.message}
-                      </label>
-                      <textarea
-                        id="treatment-notes"
-                        rows={3}
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        placeholder={t.form.messagePlaceholder}
-                        className="w-full px-3.5 py-2.5 rounded-lg border border-[#CBB3A9] bg-white text-sm text-[#32241F] placeholder:text-[#8E7F7A] focus:outline-none focus:ring-2 focus:ring-[#884838] resize-y"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Consent & Submit */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
-                    <div>
-                      <label className="flex items-center gap-2.5 text-sm text-[#69554E] cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={consent}
-                          onChange={(e) => {
-                            setConsent(e.target.checked);
-                            if (errors.consent) setErrors({ ...errors, consent: '' });
-                          }}
-                          className="h-[18px] w-[18px] rounded border-[#CBB3A9] accent-[#884838] shrink-0"
-                        />
-                        <span>{t.form.consent}</span>
-                      </label>
-                      {errors.consent && (
-                        <p className="mt-1 text-xs text-red-700">{errors.consent}</p>
-                      )}
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={submitting}
-                      className="min-h-[48px] inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-[#884838] hover:bg-[#6A382D] disabled:opacity-60 text-white font-bold text-sm shadow-sm transition-colors cursor-pointer shrink-0"
-                    >
-                      {submitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>{t.form.submitting}</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>{t.form.submit}</span>
-                          {isRTL ? (
-                            <ArrowLeft className="w-4 h-4" />
-                          ) : (
-                            <ArrowRight className="w-4 h-4" />
-                          )}
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-          </section>
-
-          {/* =================================================================
-              SECTION 03 — OUR MEDICAL SERVICES (4 SPECIALTIES + CASE PHOTOS)
+              SECTION 02 — OUR MEDICAL SERVICES
           ================================================================== */}
           <section
             id="services"
             aria-labelledby="services-heading"
-            className="max-w-[1120px] mx-auto px-4 sm:px-8 py-14 sm:py-16 scroll-mt-20"
+            className="max-w-[1200px] mx-auto px-4 sm:px-8 py-16 sm:py-20 scroll-mt-20"
           >
-            <h2
-              id="services-heading"
-              className="text-3xl sm:text-4xl font-extrabold text-[#32241F] tracking-tight mb-7"
-            >
-              {t.specialtiesSection.heading}
-            </h2>
+            <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
+              <span className="inline-block h-px w-12 bg-[#B27262] mb-4" aria-hidden="true" />
+              <h2
+                id="services-heading"
+                className="font-editorial text-3xl sm:text-[2.6rem] font-semibold text-[#32241F] tracking-tight"
+              >
+                {t.specialtiesSection.heading}
+              </h2>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* 1. Dental Surgery & Cosmetic Dentistry */}
-              {(() => {
-                const dentalCasesForCard = visibleCases.filter((c) => c.category === 'dental');
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {(['dental', 'hair', 'plastic', 'spine'] as SpecialtyCategory[]).map((cat, idx) => {
+                const s = t.specialtiesSection;
+                const title = s[cat].title;
                 return (
-                  <article className="flex flex-col gap-3.5 border border-[#E8D7CF] bg-white rounded-2xl p-6 shadow-[0_6px_18px_rgba(86,46,34,0.03)]">
-                    <div className="w-11 h-11 rounded-xl bg-[#F7EEEA] text-[#884838] grid place-items-center shrink-0">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6" aria-hidden="true">
-                        <path d="M12 4c-2-1-3-2-5-1C2 4 3 10 5 13c1 2 1 8 4 8 2 0 1-7 3-7s1 7 3 7c3 0 3-6 4-8 2-3 3-9-2-10-2-.4-3 .5-5 1Z" />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-[#32241F] leading-snug">
-                      {t.specialtiesSection.dental.title}
-                    </h3>
-                    <p className="text-sm text-[#69554E] leading-relaxed">
-                      {t.specialtiesSection.dental.desc}
-                    </p>
-
-                    {dentalCasesForCard.length > 0 && (
-                      <div className="grid grid-cols-3 gap-2 mt-auto pt-2">
-                        {dentalCasesForCard.map((item) => {
-                          const globalIdx = visibleCases.findIndex((c) => c.id === item.id);
-                          const label = isRTL ? item.titleAr : item.titleEn;
-                          return (
-                            <button
-                              key={item.id}
-                              type="button"
-                              onClick={() => setLightboxIndex(globalIdx)}
-                              aria-label={`${t.specialtiesSection.enlargePrefix} ${label}`}
-                              className="group relative bg-[#FDF8F5] border border-[#E8D7CF] hover:border-[#884838] rounded-lg overflow-hidden cursor-zoom-in transition-colors"
-                            >
-                              <img
-                                src={item.src}
-                                alt={label}
-                                loading="lazy"
-                                decoding="async"
-                                className="w-full h-[128px] object-contain bg-[#FDF8F5] group-hover:scale-[1.03] transition-transform duration-300"
-                              />
-                            </button>
-                          );
-                        })}
+                  <article
+                    key={cat}
+                    className="luxury-card-hover group/card flex flex-col bg-white border border-[#EADBD3] rounded-3xl p-6 sm:p-7"
+                  >
+                    <header className="flex items-start gap-4 mb-4">
+                      <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#F7EEEA] to-[#EFD9CF] text-[#884838] grid place-items-center shrink-0">
+                        <SpecialtyIcon category={cat} className="w-6 h-6" />
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[11px] font-bold tracking-[0.2em] text-[#B27262]">
+                          {sectionNumber(idx + 1)}
+                        </span>
+                        <h3 className="font-editorial text-xl sm:text-[1.55rem] font-semibold text-[#32241F] leading-snug">
+                          {title}
+                        </h3>
                       </div>
-                    )}
+                    </header>
 
-                    <button
-                      type="button"
-                      onClick={() => handleSelectServiceAndScroll('dental')}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#884838] hover:text-[#32241F] underline underline-offset-4 self-start pt-1 cursor-pointer"
-                    >
-                      <span>{t.specialtiesSection.consultCta}</span>
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="space-y-3 text-[14px] text-[#69554E] leading-relaxed mb-5">
+                      {cat === 'dental' && <p>{s.dental.desc}</p>}
+                      {cat === 'hair' && <p>{s.hair.desc}</p>}
+                      {cat === 'plastic' && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <h4 className="text-[13px] font-bold uppercase tracking-wider text-[#884838] mb-1">
+                              {s.plastic.faceTitle}
+                            </h4>
+                            <p>{s.plastic.faceDesc}</p>
+                          </div>
+                          <div>
+                            <h4 className="text-[13px] font-bold uppercase tracking-wider text-[#884838] mb-1">
+                              {s.plastic.bodyTitle}
+                            </h4>
+                            <p>{s.plastic.bodyDesc}</p>
+                          </div>
+                        </div>
+                      )}
+                      {cat === 'spine' && (
+                        <>
+                          <p>{s.spine.desc}</p>
+                          <p className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F7EEEA] text-[#884838] text-[12.5px] font-bold">
+                            <Award className="w-3.5 h-3.5" />
+                            {s.spine.experience}
+                          </p>
+                          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                            {s.spine.offerings.map((item) => (
+                              <li key={item} className="flex items-start gap-2">
+                                <CheckCircle2 className="w-4 h-4 text-[#B27262] shrink-0 mt-0.5" />
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="mt-auto space-y-4">
+                      {cat === 'dental' && renderCaseThumbs('dental', 'grid-cols-3', 'h-[120px]')}
+                      {cat === 'hair' && renderCaseThumbs('hair', 'grid-cols-3', 'h-[120px]')}
+                      {cat === 'plastic' && renderCaseThumbs('plastic', 'grid-cols-2', 'h-[150px] lg:h-[230px]')}
+                      {cat === 'spine' && renderCaseThumbs('spine', 'grid-cols-1', 'h-[140px]')}
+
+                      <div className="pt-4 border-t border-[#F1E5DF]">
+                        <button
+                          type="button"
+                          onClick={() => handleSelectServiceAndScroll(cat)}
+                          className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[#884838] hover:text-[#32241F] transition-colors cursor-pointer"
+                        >
+                          <span>{s.consultCta}</span>
+                          {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
                   </article>
                 );
-              })()}
-
-              {/* 2. Hair Transplantation */}
-              {(() => {
-                const hairCasesForCard = visibleCases.filter((c) => c.category === 'hair');
-                return (
-                  <article className="flex flex-col gap-3.5 border border-[#E8D7CF] bg-white rounded-2xl p-6 shadow-[0_6px_18px_rgba(86,46,34,0.03)]">
-                    <div className="w-11 h-11 rounded-xl bg-[#F7EEEA] text-[#884838] grid place-items-center shrink-0">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6" aria-hidden="true">
-                        <path d="M3 20h18M7 17c0-6 2-10 7-14M12 17c0-4 2-8 6-10M17 17c0-2 1-4 3-5" />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-[#32241F] leading-snug">
-                      {t.specialtiesSection.hair.title}
-                    </h3>
-                    <p className="text-sm text-[#69554E] leading-relaxed">
-                      {t.specialtiesSection.hair.desc}
-                    </p>
-
-                    {hairCasesForCard.length > 0 && (
-                      <div className="grid grid-cols-3 gap-2 mt-auto pt-2">
-                        {hairCasesForCard.map((item) => {
-                          const globalIdx = visibleCases.findIndex((c) => c.id === item.id);
-                          const label = isRTL ? item.titleAr : item.titleEn;
-                          return (
-                            <button
-                              key={item.id}
-                              type="button"
-                              onClick={() => setLightboxIndex(globalIdx)}
-                              aria-label={`${t.specialtiesSection.enlargePrefix} ${label}`}
-                              className="group relative bg-[#FDF8F5] border border-[#E8D7CF] hover:border-[#884838] rounded-lg overflow-hidden cursor-zoom-in transition-colors"
-                            >
-                              <img
-                                src={item.src}
-                                alt={label}
-                                loading="lazy"
-                                decoding="async"
-                                className="w-full h-[128px] object-contain bg-[#FDF8F5] group-hover:scale-[1.03] transition-transform duration-300"
-                              />
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={() => handleSelectServiceAndScroll('hair')}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#884838] hover:text-[#32241F] underline underline-offset-4 self-start pt-1 cursor-pointer"
-                    >
-                      <span>{t.specialtiesSection.consultCta}</span>
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </button>
-                  </article>
-                );
-              })()}
-
-              {/* 3. Plastic & Aesthetic Surgery */}
-              {(() => {
-                const plasticCasesForCard = visibleCases.filter((c) => c.category === 'plastic');
-                return (
-                  <article className="flex flex-col gap-3.5 border border-[#E8D7CF] bg-white rounded-2xl p-6 shadow-[0_6px_18px_rgba(86,46,34,0.03)]">
-                    <div className="w-11 h-11 rounded-xl bg-[#F7EEEA] text-[#884838] grid place-items-center shrink-0">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6" aria-hidden="true">
-                        <path d="M12 3c-5 0-8 3-8 8v2c0 4 4 8 8 8s8-4 8-8v-2c0-5-3-8-8-8Zm-4 9h.01m8 0h.01M10 16c1.3 1 2.7 1 4 0" />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-[#32241F] leading-snug">
-                      {t.specialtiesSection.plastic.title}
-                    </h3>
-
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-bold text-[#884838]">
-                        {t.specialtiesSection.plastic.faceTitle}
-                      </h4>
-                      <p className="text-sm text-[#69554E] leading-relaxed">
-                        {t.specialtiesSection.plastic.faceDesc}
-                      </p>
-                    </div>
-
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-bold text-[#884838]">
-                        {t.specialtiesSection.plastic.bodyTitle}
-                      </h4>
-                      <p className="text-sm text-[#69554E] leading-relaxed">
-                        {t.specialtiesSection.plastic.bodyDesc}
-                      </p>
-                    </div>
-
-                    {plasticCasesForCard.length > 0 && (
-                      <div className="grid grid-cols-2 gap-2 mt-auto pt-2">
-                        {plasticCasesForCard.map((item) => {
-                          const globalIdx = visibleCases.findIndex((c) => c.id === item.id);
-                          const label = isRTL ? item.titleAr : item.titleEn;
-                          return (
-                            <button
-                              key={item.id}
-                              type="button"
-                              onClick={() => setLightboxIndex(globalIdx)}
-                              aria-label={`${t.specialtiesSection.enlargePrefix} ${label}`}
-                              className="group relative bg-[#FDF8F5] border border-[#E8D7CF] hover:border-[#884838] rounded-lg overflow-hidden cursor-zoom-in transition-colors"
-                            >
-                              <img
-                                src={item.src}
-                                alt={label}
-                                loading="lazy"
-                                decoding="async"
-                                className="w-full h-[148px] object-contain bg-[#FDF8F5] group-hover:scale-[1.03] transition-transform duration-300"
-                              />
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={() => handleSelectServiceAndScroll('plastic')}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#884838] hover:text-[#32241F] underline underline-offset-4 self-start pt-1 cursor-pointer"
-                    >
-                      <span>{t.specialtiesSection.consultCta}</span>
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </button>
-                  </article>
-                );
-              })()}
-
-              {/* 4. Spine Surgery & Spinal Disorders Treatment */}
-              {(() => {
-                const spineCasesForCard = visibleCases.filter((c) => c.category === 'spine');
-                return (
-                  <article className="flex flex-col gap-3.5 border border-[#E8D7CF] bg-white rounded-2xl p-6 shadow-[0_6px_18px_rgba(86,46,34,0.03)]">
-                    <div className="w-11 h-11 rounded-xl bg-[#F7EEEA] text-[#884838] grid place-items-center shrink-0">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6" aria-hidden="true">
-                        <path d="M12 2v3m0 14v3M10 7H8m6 0h2m-6 5H7m7 0h3m-7 5H8m6 0h2" />
-                        <rect x="10" y="5" width="4" height="4" rx="1" />
-                        <rect x="10" y="10" width="4" height="4" rx="1" />
-                        <rect x="10" y="15" width="4" height="4" rx="1" />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-[#32241F] leading-snug">
-                      {t.specialtiesSection.spine.title}
-                    </h3>
-                    <p className="text-sm text-[#69554E] leading-relaxed">
-                      {t.specialtiesSection.spine.desc}
-                    </p>
-                    <p className="text-sm font-bold text-[#884838]">
-                      {t.specialtiesSection.spine.experience}
-                    </p>
-                    <ul className="list-disc ps-5 space-y-1 text-sm text-[#69554E] marker:text-[#884838]">
-                      {t.specialtiesSection.spine.offerings.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-
-                    {spineCasesForCard.length > 0 && (
-                      <div className="grid grid-cols-1 gap-2 mt-auto pt-2">
-                        {spineCasesForCard.map((item) => {
-                          const globalIdx = visibleCases.findIndex((c) => c.id === item.id);
-                          const label = isRTL ? item.titleAr : item.titleEn;
-                          return (
-                            <button
-                              key={item.id}
-                              type="button"
-                              onClick={() => setLightboxIndex(globalIdx)}
-                              aria-label={`${t.specialtiesSection.enlargePrefix} ${label}`}
-                              className="group relative bg-[#FDF8F5] border border-[#E8D7CF] hover:border-[#884838] rounded-lg overflow-hidden cursor-zoom-in transition-colors"
-                            >
-                              <img
-                                src={item.src}
-                                alt={label}
-                                loading="lazy"
-                                decoding="async"
-                                className="w-full h-[148px] object-contain bg-[#FDF8F5] group-hover:scale-[1.03] transition-transform duration-300"
-                              />
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={() => handleSelectServiceAndScroll('spine')}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#884838] hover:text-[#32241F] underline underline-offset-4 self-start pt-1 cursor-pointer"
-                    >
-                      <span>{t.specialtiesSection.consultCta}</span>
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </button>
-                  </article>
-                );
-              })()}
+              })}
             </div>
           </section>
 
           {/* =================================================================
-              SECTION 04 — PATIENT SUPPORT (4 ITEMS)
+              SECTION 03 — PATIENT SUPPORT
           ================================================================== */}
           <section
             id="support"
             aria-labelledby="support-heading"
-            className="bg-[#F7EEEA] py-14 sm:py-16 border-y border-[#E8D7CF] scroll-mt-20"
+            className="bg-[#F7EEEA] border-y border-[#EADBD3] py-16 sm:py-20 scroll-mt-20"
           >
-            <div className="max-w-[1120px] mx-auto px-4 sm:px-8">
-              <h2
-                id="support-heading"
-                className="text-3xl sm:text-4xl font-extrabold text-[#32241F] tracking-tight text-center"
-              >
-                {t.support.heading}
-              </h2>
+            <div className="max-w-[1200px] mx-auto px-4 sm:px-8">
+              <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
+                <span className="inline-block h-px w-12 bg-[#B27262] mb-4" aria-hidden="true" />
+                <h2
+                  id="support-heading"
+                  className="font-editorial text-3xl sm:text-[2.6rem] font-semibold text-[#32241F] tracking-tight"
+                >
+                  {t.support.heading}
+                </h2>
+              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-7">
-                {t.support.items.map((item, idx) => (
-                  <article
-                    key={item.title}
-                    className="bg-[#FFFCFA] border border-[#E8D7CF] rounded-xl p-5 flex items-start gap-3.5"
-                  >
-                    <div className="w-11 h-11 rounded-xl bg-[#F7EEEA] text-[#884838] grid place-items-center shrink-0">
-                      {idx === 0 && (
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
-                          <path d="m5 11 1.4-4.3A2 2 0 0 1 8.3 5h7.4a2 2 0 0 1 1.9 1.7L19 11M5 18v2m14-2v2M3 15a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v3H3v-3Zm4 0h2m6 0h2" />
-                        </svg>
-                      )}
-                      {idx === 1 && (
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
-                          <path d="M3 20v-9m18 9v-5a3 3 0 0 0-3-3h-6v5M3 17h18M7 12h2v5H5v-3a2 2 0 0 1 2-2ZM7 9V4h10v5" />
-                        </svg>
-                      )}
-                      {idx === 2 && <Globe className="w-5 h-5" strokeWidth={1.65} />}
-                      {idx === 3 && (
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
-                          <path d="M20 11a8 8 0 0 1-8 8H5l1.4-3.1A8 8 0 1 1 20 11Z" />
-                          <path d="m9 11 2 2 4-4" />
-                        </svg>
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold text-[#32241F] leading-snug">
-                        {item.title}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-[#69554E] mt-1.5 leading-relaxed">
-                        {item.desc}
-                      </p>
-                    </div>
-                  </article>
-                ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {t.support.items.map((item, idx) => {
+                  const Icon = SUPPORT_ICONS[idx] ?? HeartHandshake;
+                  return (
+                    <article
+                      key={item.title}
+                      className="luxury-card-hover relative flex items-start gap-5 bg-[#FFFCFA] border border-[#EADBD3] rounded-2xl p-6 sm:p-7 overflow-hidden"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="absolute top-4 end-5 font-editorial text-5xl font-semibold text-[#884838]/[0.07] select-none leading-none"
+                      >
+                        {sectionNumber(idx + 1)}
+                      </span>
+                      <span className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-[#F7EEEA] to-[#EFD9CF] border border-[#EADBD3] text-[#884838] grid place-items-center shrink-0 shadow-[0_6px_16px_-8px_rgba(136,72,56,0.35)]">
+                        <Icon className="w-6 h-6" strokeWidth={1.6} />
+                      </span>
+                      <div className="relative flex-1 min-w-0 pe-8">
+                        <h3 className="text-lg font-bold text-[#32241F] leading-snug">{item.title}</h3>
+                        <p className="mt-1.5 text-[14px] text-[#69554E] leading-relaxed">{item.desc}</p>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
             </div>
           </section>
 
           {/* =================================================================
-              SECTION 05 — CONNECT WITH ESTELUX
-          ================================================================== */}
-          <section className="max-w-[1120px] mx-auto px-4 sm:px-8 py-12 text-center">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#32241F] tracking-tight">
-              {t.social.heading}
-            </h2>
-            <div className="flex flex-wrap items-center justify-center gap-3 mt-5">
-              <a
-                href={INSTAGRAM_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 border border-[#E8D7CF] hover:bg-[#F7EEEA] px-4 py-2.5 min-h-[46px] rounded-xl text-[#884838] font-bold text-sm transition-colors"
-              >
-                <span className="w-7 h-7 rounded-lg grid place-items-center text-white bg-[radial-gradient(circle_at_24%_97%,#feda75,#fa7e1e_22%,#d62976_52%,#962fbf_76%,#4f5bd5)]">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
-                    <rect x="3" y="3" width="18" height="18" rx="5" />
-                    <circle cx="12" cy="12" r="4" />
-                    <path d="M17.5 6.5h.01" />
-                  </svg>
-                </span>
-                <span>{t.social.instagram}</span>
-              </a>
-
-              <a
-                href={FACEBOOK_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 border border-[#E8D7CF] hover:bg-[#F7EEEA] px-4 py-2.5 min-h-[46px] rounded-xl text-[#884838] font-bold text-sm transition-colors"
-              >
-                <span className="w-7 h-7 rounded-lg grid place-items-center text-white bg-[#0866FF]">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4" aria-hidden="true">
-                    <path d="M14 22v-9h3l.5-3H14V8c0-.9.3-1.5 1.6-1.5H18V3.8c-.5-.1-1.6-.3-2.8-.3-2.9 0-4.7 1.7-4.7 4.6V10H8v3h2.5v9Z" />
-                  </svg>
-                </span>
-                <span>{t.social.facebook}</span>
-              </a>
-
-              <a
-                href={defaultWaUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 border border-[#E8D7CF] hover:bg-[#F7EEEA] px-4 py-2.5 min-h-[46px] rounded-xl text-[#884838] font-bold text-sm transition-colors"
-              >
-                <span className="w-7 h-7 rounded-lg grid place-items-center text-[#123D25] bg-[#25D366]">
-                  <MessageCircle className="w-4 h-4" />
-                </span>
-                <span>{t.social.whatsapp}</span>
-              </a>
-            </div>
-          </section>
-
-          {/* =================================================================
-              SECTION 06 — PATIENT REVIEWS (3 CLEAN CARDS)
+              SECTION 04 — PATIENT REVIEWS
           ================================================================== */}
           <section
             id="reviews"
             aria-labelledby="reviews-heading"
-            className="bg-[#F7EEEA] py-14 sm:py-16 border-t border-[#E8D7CF] scroll-mt-20"
+            className="max-w-[1200px] mx-auto px-4 sm:px-8 py-16 sm:py-20 scroll-mt-20"
           >
-            <div className="max-w-[1120px] mx-auto px-4 sm:px-8">
+            <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
+              <span className="inline-block h-px w-12 bg-[#B27262] mb-4" aria-hidden="true" />
               <h2
                 id="reviews-heading"
-                className="text-3xl sm:text-4xl font-extrabold text-[#32241F] tracking-tight text-center"
+                className="font-editorial text-3xl sm:text-[2.6rem] font-semibold text-[#32241F] tracking-tight"
               >
                 {t.reviews.heading}
               </h2>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-7">
-                {t.reviews.items.map((rev) => (
-                  <blockquote
-                    key={rev.cite}
-                    className="flex flex-col justify-between gap-4 bg-[#FFFCFA] border border-[#E8D7CF] rounded-xl p-6"
-                  >
-                    <p className="text-base sm:text-lg font-serif text-[#32241F] leading-relaxed">
-                      {rev.quote}
-                    </p>
-                    <cite className="not-italic text-sm font-medium text-[#69554E]">
-                      {rev.cite}
-                    </cite>
-                  </blockquote>
-                ))}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {t.reviews.items.map((rev) => (
+                <blockquote
+                  key={rev.cite}
+                  className="luxury-card-hover flex flex-col gap-5 bg-white border border-[#EADBD3] rounded-2xl p-7"
+                >
+                  <div className="flex items-center justify-between">
+                    <Quote className="w-8 h-8 text-[#B27262]/40 rtl:-scale-x-100" />
+                    <div className="flex gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-3.5 h-3.5 fill-[#C89B5A] text-[#C89B5A]" />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="font-editorial text-lg sm:text-xl text-[#32241F] leading-relaxed flex-1">
+                    {rev.quote}
+                  </p>
+                  <cite className="not-italic flex items-center gap-3 pt-4 border-t border-[#F1E5DF]">
+                    <span className="w-9 h-9 rounded-full bg-[#F7EEEA] text-[#884838] grid place-items-center text-sm font-bold">
+                      {rev.cite.charAt(0)}
+                    </span>
+                    <span className="text-[13.5px] font-semibold text-[#69554E]">{rev.cite}</span>
+                  </cite>
+                </blockquote>
+              ))}
+            </div>
+          </section>
+
+          {/* =================================================================
+              SECTION 05 — CONNECT WITH ESTELUX (CTA BAND)
+          ================================================================== */}
+          <section className="max-w-[1200px] mx-auto px-4 sm:px-8 pb-16 sm:pb-20">
+            <div className="relative overflow-hidden rounded-3xl bg-[radial-gradient(ellipse_at_80%_0%,#A76150,#6A382D)] px-6 sm:px-12 py-10 sm:py-12 text-center">
+              <img
+                src="/client-logo.webp"
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none absolute -end-10 -bottom-12 w-64 opacity-[0.08] brightness-0 invert"
+              />
+              <h2 className="relative font-editorial text-2xl sm:text-4xl font-semibold text-white tracking-tight">
+                {t.social.heading}
+              </h2>
+              <div className="relative flex flex-wrap items-center justify-center gap-3 mt-7">
+                <a
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2.5 min-h-[48px] px-5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-sm backdrop-blur-sm transition-colors"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]" aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="5" />
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M17.5 6.5h.01" />
+                  </svg>
+                  <span>{t.social.instagram}</span>
+                </a>
+                <a
+                  href={FACEBOOK_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2.5 min-h-[48px] px-5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-sm backdrop-blur-sm transition-colors"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px]" aria-hidden="true">
+                    <path d="M14 22v-9h3l.5-3H14V8c0-.9.3-1.5 1.6-1.5H18V3.8c-.5-.1-1.6-.3-2.8-.3-2.9 0-4.7 1.7-4.7 4.6V10H8v3h2.5v9Z" />
+                  </svg>
+                  <span>{t.social.facebook}</span>
+                </a>
+                <a
+                  href={defaultWaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2.5 min-h-[48px] px-5 rounded-xl bg-[#25D366] hover:bg-[#1fbe5a] text-[#0F3B22] font-bold text-sm transition-colors"
+                >
+                  <MessageCircle className="w-[18px] h-[18px]" />
+                  <span>{t.social.whatsapp}</span>
+                </a>
               </div>
             </div>
           </section>

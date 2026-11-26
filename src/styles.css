@@ -8,10 +8,14 @@
   }
 
   body {
-    background-color: #FAF7F2;
+    background-color: #FFFCFA;
     color: #4A3F3B;
     overflow-x: hidden;
   }
+}
+
+.font-editorial {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
 }
 
 /* Custom subtle glass & luxury card utilities */
@@ -23,7 +27,7 @@
 
 .luxury-card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 18px 42px -12px rgba(28, 25, 24, 0.09);
+  box-shadow: 0 18px 42px -12px rgba(86, 46, 34, 0.1);
 }
 
 @keyframes pulseSubtle {
@@ -33,4 +37,10 @@
 
 .animate-pulse-subtle {
   animation: pulseSubtle 2.2s infinite ease-in-out;
+}
+
+[dir='rtl'] .font-editorial {
+  font-family: 'Cairo', Tahoma, sans-serif;
+  font-style: normal;
+  letter-spacing: 0;
 }
