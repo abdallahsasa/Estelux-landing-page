@@ -156,18 +156,6 @@ const BROKEN_LEGACY_FILES = new Set([
 
 const INITIAL_CASES: DentalCase[] = [
   {
-    id: 'case-dental-1',
-    src: DEFAULT_ASSETS.case1,
-    category: 'dental',
-    titleEn: 'Hollywood Smile',
-    titleAr: 'هوليوود سمايل',
-    tagEn: CATEGORY_META.dental.tagEn,
-    tagAr: CATEGORY_META.dental.tagAr,
-    captionEn: 'Before and after photos: Hollywood Smile',
-    captionAr: 'صور قبل وبعد: هوليوود سمايل',
-    visible: true,
-  },
-  {
     id: 'case-dental-2',
     src: DEFAULT_ASSETS.case2,
     category: 'dental',
@@ -179,6 +167,19 @@ const INITIAL_CASES: DentalCase[] = [
     captionAr: 'صور قبل وبعد: الحالة الأولى لتجميل الأسنان',
     visible: true,
   },
+  {
+    id: 'case-dental-1',
+    src: DEFAULT_ASSETS.case1,
+    category: 'dental',
+    titleEn: 'Hollywood Smile',
+    titleAr: 'هوليوود سمايل',
+    tagEn: CATEGORY_META.dental.tagEn,
+    tagAr: CATEGORY_META.dental.tagAr,
+    captionEn: 'Before and after photos: Hollywood Smile',
+    captionAr: 'صور قبل وبعد: هوليوود سمايل',
+    visible: true,
+  },
+
   {
     id: 'case-dental-3',
     src: DEFAULT_ASSETS.case3,
@@ -274,7 +275,8 @@ const INITIAL_LEADS: ConsultationLead[] = [
     country: 'Saudi Arabia',
     email: 'sara.m@example.com',
     serviceValue: 'dental',
-    timeline: '1–3 months',
+    timeline: '1-3-months',
+    arrivalDate: '2026-12-18',
     message: 'أرغب في معرفة تكلفة هوليوود سمايل (20 سن) ومدة الإقامة المطلوبة في إسطنبول.',
     status: 'new',
     adminNotes: 'Prefer evening WhatsApp call after 6 PM Istanbul time.',
@@ -289,7 +291,8 @@ const INITIAL_LEADS: ConsultationLead[] = [
     country: 'Germany',
     email: 'l.schneider@example.de',
     serviceValue: 'hair',
-    timeline: 'ASAP',
+    timeline: 'soon',
+    arrivalDate: '2026-12-05',
     message: 'Interested in DHI / Sapphire FUE hair transplantation with VIP airport transfer.',
     status: 'contacted',
     adminNotes: 'Sent photo instructions & treatment itinerary via WhatsApp.',
@@ -304,7 +307,8 @@ const INITIAL_LEADS: ConsultationLead[] = [
     country: 'Ireland',
     email: 'aoife.oconnor@example.ie',
     serviceValue: 'plastic',
-    timeline: '1–3 months',
+    timeline: '1-3-months',
+    arrivalDate: '2026-12-22',
     message: 'Looking for consultation regarding rhinoplasty and hotel booking near the clinic.',
     status: 'booked',
     adminNotes: 'Confirmed Dublin–Istanbul flight on the 22nd — VIP Transfer arranged.',
@@ -570,8 +574,14 @@ const TRANSLATIONS = {
         exportCsv: 'Export CSV',
         empty: 'No consultation messages match your filter.',
         patient: 'Patient',
-        service: 'Requested Service',
-        message: 'Patient Message',
+        service: 'Treatment of interest',
+        timeline: 'Travel plan',
+        arrivalDate: 'Expected arrival date',
+        country: 'Country',
+        whatsapp: 'WhatsApp',
+        email: 'Email',
+        notProvided: 'Not provided',
+        message: 'Treatment goals / questions',
         noMessage: 'No additional notes provided.',
         notesLabel: 'Coordinator Internal Notes',
         notesPlaceholder: 'Add flight details, X-ray status, or follow-up notes...',
@@ -854,8 +864,14 @@ const TRANSLATIONS = {
         exportCsv: 'تصدير Excel / CSV',
         empty: 'لا توجد رسائل تطابق خيارات البحث الحالية.',
         patient: 'المراجع',
-        service: 'الخدمة المطلوبة',
-        message: 'رسالة المراجع',
+        service: 'العلاج الذي يهمّك',
+        timeline: 'موعد السفر المتوقع',
+        arrivalDate: 'تاريخ الوصول المتوقع',
+        country: 'بلد الإقامة',
+        whatsapp: 'رقم واتساب',
+        email: 'البريد الإلكتروني',
+        notProvided: 'غير محدد',
+        message: 'أهداف العلاج أو الأسئلة',
         noMessage: 'لم يترك المراجع رسالة إضافية.',
         notesLabel: 'ملاحظات فريق التنسيق (داخلية)',
         notesPlaceholder: 'أضف تفاصيل الرحلة، صور الأشعة، أو موعد المتابعة...',
@@ -1313,6 +1329,11 @@ export function App() {
   const getServiceLabel = (serviceValue: string) =>
     t.form.services.find((s) => s.value === serviceValue)?.label || serviceValue;
 
+  const getTimelineLabel = (timelineValue?: string) => {
+    if (!timelineValue) return '';
+    return t.form.timelines.find((tl) => tl.value === timelineValue)?.label || timelineValue;
+  };
+
   // Client-side image compression + reader so uploaded photos fit comfortably in localStorage
   const handleImageFileUpload = (
     file: File | undefined,
@@ -1429,14 +1450,16 @@ export function App() {
     const headers = [
       'ID',
       'Full Name',
-      'Phone',
+      'WhatsApp',
       'Country',
       'Email',
-      'Service',
-      'Timeline',
-      'Message',
+      'Treatment of Interest',
+      'Travel Plan',
+      'Expected Arrival Date',
+      'Treatment Goals / Questions',
       'Status',
       'Admin Notes',
+      'Language',
       'Created At',
     ];
     const rows = leads.map((l) => [
@@ -1444,12 +1467,14 @@ export function App() {
       `"${l.fullName.replace(/"/g, '""')}"`,
       `"${l.countryCode} ${l.phone}"`,
       `"${l.country.replace(/"/g, '""')}"`,
-      `"${l.email}"`,
-      `"${getServiceLabel(l.serviceValue)}"`,
-      `"${(l.timeline || '').replace(/"/g, '""')}"`,
+      `"${(l.email || '').replace(/"/g, '""')}"`,
+      `"${getServiceLabel(l.serviceValue).replace(/"/g, '""')}"`,
+      `"${getTimelineLabel(l.timeline).replace(/"/g, '""')}"`,
+      `"${(l.arrivalDate || '').replace(/"/g, '""')}"`,
       `"${l.message.replace(/"/g, '""')}"`,
       l.status,
       `"${l.adminNotes.replace(/"/g, '""')}"`,
+      l.langSubmitted,
       l.createdAt,
     ]);
     const csvContent =
@@ -1473,6 +1498,10 @@ export function App() {
       lead.fullName.toLowerCase().includes(q) ||
       lead.phone.toLowerCase().includes(q) ||
       lead.country.toLowerCase().includes(q) ||
+      (lead.email || '').toLowerCase().includes(q) ||
+      getServiceLabel(lead.serviceValue).toLowerCase().includes(q) ||
+      getTimelineLabel(lead.timeline).toLowerCase().includes(q) ||
+      (lead.arrivalDate || '').toLowerCase().includes(q) ||
       lead.message.toLowerCase().includes(q) ||
       lead.adminNotes.toLowerCase().includes(q);
     return matchesStatus && matchesQuery;
@@ -2091,9 +2120,12 @@ export function App() {
                               </span>
                               {lead.timeline && (
                                 <span className="px-2 py-0.5 rounded-md bg-[#FAF7F2] border border-[#E5D6CE] text-[11px] font-semibold text-[#5A4E4A]">
-                                  {lead.timeline}
+                                  {getTimelineLabel(lead.timeline)}
                                 </span>
                               )}
+                              <span className="text-[11px] uppercase px-1.5 py-0.5 rounded bg-[#F7EEEA] text-[#884838] font-bold">
+                                {lead.langSubmitted}
+                              </span>
                               <span className="text-[11px] text-[#52443F]">
                                 • {formatDate(lead.createdAt)}
                               </span>
@@ -2164,14 +2196,63 @@ export function App() {
                           </div>
                         </div>
 
+                        {/* Structured Form Submission Details Grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 bg-[#FAF7F2] p-3.5 rounded-xl border border-[#EFE7DD] text-xs">
+                          <div>
+                            <span className="block text-[10px] font-bold uppercase tracking-wider text-[#8C736B]">
+                              {t.admin.leads.service}
+                            </span>
+                            <span className="font-bold text-[#884838] mt-0.5 block">
+                              {serviceName}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="block text-[10px] font-bold uppercase tracking-wider text-[#8C736B]">
+                              {t.admin.leads.timeline}
+                            </span>
+                            <span className="font-semibold text-[#1C1918] mt-0.5 block">
+                              {getTimelineLabel(lead.timeline) || t.admin.leads.notProvided}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="block text-[10px] font-bold uppercase tracking-wider text-[#8C736B]">
+                              {t.admin.leads.arrivalDate}
+                            </span>
+                            <span dir="ltr" className="font-semibold text-[#1C1918] mt-0.5 block">
+                              {lead.arrivalDate || t.admin.leads.notProvided}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="block text-[10px] font-bold uppercase tracking-wider text-[#8C736B]">
+                              {t.admin.leads.country}
+                            </span>
+                            <span className="font-semibold text-[#1C1918] mt-0.5 block">
+                              {lead.country || t.admin.leads.notProvided}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="block text-[10px] font-bold uppercase tracking-wider text-[#8C736B]">
+                              {t.admin.leads.whatsapp}
+                            </span>
+                            <span dir="ltr" className="font-semibold text-[#1C1918] mt-0.5 block">
+                              {lead.countryCode} {lead.phone}
+                            </span>
+                          </div>
+                          <div className="min-w-0">
+                            <span className="block text-[10px] font-bold uppercase tracking-wider text-[#8C736B]">
+                              {t.admin.leads.email}
+                            </span>
+                            <span className="font-semibold text-[#1C1918] mt-0.5 block truncate" title={lead.email || ''}>
+                              {lead.email || t.admin.leads.notProvided}
+                            </span>
+                          </div>
+                        </div>
+
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                           <div className="lg:col-span-6 bg-[#FAF7F2] p-3.5 rounded-xl border border-[#EFE7DD] space-y-1.5">
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="font-bold text-[#8C4332]">{serviceName}</span>
-                              <span className="text-[11px] uppercase text-[#52443F]">
-                                {lead.langSubmitted}
-                              </span>
-                            </div>
+                            <span className="block text-[11px] font-bold text-[#8C4332]">
+                              {t.admin.leads.message}
+                            </span>
                             <p className="text-xs sm:text-sm text-[#1C1918] leading-relaxed flex items-start gap-2">
                               <FileText className="w-4 h-4 text-[#52443F] shrink-0 mt-0.5" />
                               <span>{lead.message || t.admin.leads.noMessage}</span>
@@ -2915,8 +2996,8 @@ export function App() {
                               aria-pressed={selectedTimeline === tl.value}
                               onClick={() => setSelectedTimeline(tl.value)}
                               className={`min-h-[38px] px-2 rounded-lg text-[13px] font-semibold transition-all cursor-pointer ${selectedTimeline === tl.value
-                                  ? 'bg-[#884838] text-white shadow-sm'
-                                  : 'text-[#5A4640] hover:bg-white/80'
+                                ? 'bg-[#884838] text-white shadow-sm'
+                                : 'text-[#5A4640] hover:bg-white/80'
                                 }`}
                             >
                               {tl.label}
