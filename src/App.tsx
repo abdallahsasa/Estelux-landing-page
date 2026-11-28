@@ -107,7 +107,7 @@ const STORAGE_KEYS = {
   leads: 'estelux_consultation_leads_v1',
   cases: 'estelux_clinical_cases_v5',
   logo: 'estelux_brand_logo_v4',
-  heroPhoto: 'estelux_hero_photo_v4',
+  heroPhoto: 'estelux_hero_photo_v5',
   adminPin: 'estelux_admin_pin_v1',
   adminSession: 'estelux_admin_auth_session_v1',
 };
@@ -123,7 +123,7 @@ const DEFAULT_ASSETS = {
   case7: '/case-plastic-body.webp',
   case8: '/case-plastic-facelift.webp',
   case9: '/case-spine-scoliosis.webp',
-  heroDental: '/client-logo.webp',
+  heroDental: '/hero-clinic.jpg',
 };
 
 const CATEGORY_META: Record<SpecialtyCategory, { tagEn: string; tagAr: string }> = {
@@ -2881,85 +2881,109 @@ export function App() {
               className="pointer-events-none absolute -bottom-48 -start-40 w-[480px] h-[480px] rounded-full bg-[radial-gradient(circle,rgba(136,72,56,0.08),transparent_65%)]"
             />
 
-            <div className="relative max-w-[1200px] mx-auto px-4 sm:px-8 py-10 sm:py-14 lg:py-16 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-              {/* LEFT: Brand story */}
-              <div className="lg:col-span-5 space-y-6">
-                <div className="inline-flex items-center gap-2.5 ps-1.5 pe-4 py-1.5 rounded-full bg-white/70 border border-[#EADBD3] backdrop-blur-sm">
-                  <span className="w-7 h-7 rounded-full bg-[#884838] grid place-items-center">
-                    <img
-                      src="/client-logo.webp"
-                      alt=""
-                      className="w-4 h-4 object-contain brightness-0 invert"
-                    />
-                  </span>
-                  <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#884838]">
-                    {t.hero.eyebrow}
-                  </span>
+            <div className="relative max-w-[1220px] mx-auto px-4 sm:px-8 py-8 sm:py-12 lg:py-14 space-y-8 lg:space-y-10">
+              {/* TOP: Editorial Hero Header Strip */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-end">
+                <div className="lg:col-span-7 space-y-4">
+                  <div className="inline-flex items-center gap-2.5 ps-1.5 pe-4 py-1.5 rounded-full bg-white/75 border border-[#EADBD3] backdrop-blur-sm">
+                    <span className="w-7 h-7 rounded-full bg-[#884838] grid place-items-center">
+                      <img
+                        src="/client-logo.webp"
+                        alt=""
+                        className="w-4 h-4 object-contain brightness-0 invert"
+                      />
+                    </span>
+                    <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#884838]">
+                      {t.hero.eyebrow}
+                    </span>
+                  </div>
+
+                  <h1
+                    id="main-heading"
+                    className="font-editorial text-[2.35rem] sm:text-5xl xl:text-[3.4rem] font-semibold text-[#32241F] leading-[1.06] tracking-tight"
+                  >
+                    {t.hero.title}
+                  </h1>
+
+                  <p className="font-editorial italic text-xl sm:text-2xl text-[#884838] flex items-center gap-3">
+                    <span>{t.hero.sloganLeft}</span>
+                    <span aria-hidden="true" className="h-px w-8 bg-[#B27262]/60" />
+                    <span>{t.hero.sloganRight}</span>
+                  </p>
                 </div>
 
-                <h1
-                  id="main-heading"
-                  className="font-editorial text-[2.6rem] sm:text-5xl xl:text-[3.6rem] font-semibold text-[#32241F] leading-[1.06] tracking-tight"
-                >
-                  {t.hero.title}
-                </h1>
+                <div className="lg:col-span-5 space-y-4">
+                  <p className="text-[14.5px] sm:text-[15px] text-[#69554E] leading-relaxed">
+                    {t.hero.lead}
+                  </p>
 
-                <p className="font-editorial italic text-xl sm:text-2xl text-[#884838] flex items-center gap-3">
-                  <span>{t.hero.sloganLeft}</span>
-                  <span aria-hidden="true" className="h-px w-8 bg-[#B27262]/60" />
-                  <span>{t.hero.sloganRight}</span>
-                </p>
+                  {/* Compact Specialty Quick Pills */}
+                  <div className="flex flex-wrap gap-2">
+                    {t.hero.quickLinks.map((link) => (
+                      <a
+                        key={link.id}
+                        href="#services"
+                        className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/85 border border-[#EADBD3] hover:border-[#B27262] hover:bg-white transition-colors"
+                      >
+                        <span className="w-5 h-5 rounded-full bg-[#F7EEEA] text-[#884838] grid place-items-center shrink-0 group-hover:bg-[#884838] group-hover:text-white transition-colors">
+                          <SpecialtyIcon category={link.id} className="w-3 h-3" />
+                        </span>
+                        <span className="text-xs font-semibold text-[#32241F] whitespace-nowrap">
+                          {link.label}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
 
-                <p className="text-[15px] text-[#69554E] leading-relaxed max-w-[46ch]">
-                  {t.hero.lead}
-                </p>
-
-                {/* Specialty quick links */}
-                <div className="grid grid-cols-2 gap-2.5 max-w-md">
-                  {t.hero.quickLinks.map((link) => (
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-0.5">
                     <a
-                      key={link.id}
-                      href="#services"
-                      className="group flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/80 border border-[#EADBD3] hover:border-[#B27262] hover:bg-white transition-colors"
+                      href={defaultWaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 min-h-[42px] px-4 rounded-xl bg-[#157A3E] hover:bg-[#106231] text-white font-bold text-xs sm:text-sm shadow-sm transition-colors"
                     >
-                      <span className="w-8 h-8 rounded-lg bg-[#F7EEEA] text-[#884838] grid place-items-center shrink-0 group-hover:bg-[#884838] group-hover:text-white transition-colors">
-                        <SpecialtyIcon category={link.id} className="w-[18px] h-[18px]" />
-                      </span>
-                      <span className="text-[13px] font-semibold text-[#32241F] leading-tight">
-                        {link.label}
-                      </span>
+                      <MessageCircle className="w-4 h-4" />
+                      <span>{t.hero.whatsappCta}</span>
                     </a>
-                  ))}
-                </div>
-
-                <div className="flex flex-wrap items-center gap-x-5 gap-y-3 pt-1">
-                  <a
-                    href={defaultWaUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 min-h-[46px] px-5 rounded-xl bg-[#157A3E] hover:bg-[#106231] text-white font-bold text-sm shadow-sm transition-colors"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    <span>{t.hero.whatsappCta}</span>
-                  </a>
-                  <a
-                    href={defaultWaUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    dir="ltr"
-                    className="text-sm font-semibold text-[#32241F] hover:text-[#884838] transition-colors"
-                  >
-                    {WHATSAPP_DISPLAY}
-                  </a>
+                    <a
+                      href={defaultWaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      dir="ltr"
+                      className="text-sm font-semibold text-[#32241F] hover:text-[#884838] transition-colors"
+                    >
+                      {WHATSAPP_DISPLAY}
+                    </a>
+                  </div>
                 </div>
               </div>
 
-              {/* RIGHT: Consultation form */}
-              <div className="lg:col-span-7">
-                <div
-                  id="consultation"
-                  className="relative bg-white rounded-3xl border border-[#EADBD3] shadow-[0_24px_60px_-20px_rgba(86,46,34,0.18)] p-6 sm:p-8 scroll-mt-24"
-                >
+              {/* BOTTOM: Portrait Clinic Photo + Consultation Form Side-by-Side */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-7 items-stretch">
+                {/* LEFT: Editorial Clinic Portrait */}
+                <div className="lg:col-span-4 flex">
+                  <div className="relative w-full max-w-[380px] lg:max-w-none mx-auto aspect-[9/15] lg:aspect-auto rounded-3xl overflow-hidden border border-[#EADBD3] bg-[#C78F80]/20 shadow-[0_24px_60px_-20px_rgba(86,46,34,0.22)]">
+                    <img
+                      src={heroPhoto}
+                      alt={t.nav.logoAlt}
+                      width={575}
+                      height={1024}
+                      loading="eager"
+                      decoding="async"
+                      onError={(e) => {
+                        e.currentTarget.src = DEFAULT_ASSETS.heroDental;
+                      }}
+                      className="w-full h-full object-cover object-center block"
+                    />
+                  </div>
+                </div>
+
+                {/* RIGHT: Consultation Form Card */}
+                <div className="lg:col-span-8 flex">
+                  <div
+                    id="consultation"
+                    className="relative w-full bg-white rounded-3xl border border-[#EADBD3] shadow-[0_24px_60px_-20px_rgba(86,46,34,0.18)] p-6 sm:p-8 scroll-mt-24 flex flex-col justify-center"
+                  >
                   <div
                     aria-hidden="true"
                     className="absolute inset-x-8 top-0 h-[3px] rounded-b-full bg-gradient-to-r from-[#B27262] via-[#884838] to-[#B27262]"
@@ -3211,6 +3235,7 @@ export function App() {
                       </div>
                     </form>
                   )}
+                  </div>
                 </div>
               </div>
             </div>
