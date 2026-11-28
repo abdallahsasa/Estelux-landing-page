@@ -446,16 +446,28 @@ const TRANSLATIONS = {
       heading: 'Patient Reviews',
       items: [
         {
-          quote: '“The digital smile design looks completely natural.”',
-          cite: 'Markus H. · Munich',
+          quote:
+            '“A heartfelt thank you to EsteLux and especially Manar for the warm welcome and care—from my arrival at the airport to the hospital, before and after the procedure. Even when I decided to do teeth whitening the day before leaving, the result exceeded my expectations. You won’t find a more trustworthy hospital, medical team, or specialist doctors in Istanbul.”',
+          cite: 'Zaid',
+          featured: true,
         },
         {
-          quote: '“The coordination was flawless.”',
-          cite: 'Ciara D. · Dublin',
+          quote:
+            '“Your team did a great job. I received compliments on my beautiful smile, I could not be more happy.”',
+          cite: 'Darry',
         },
         {
-          quote: '“The Arabic-speaking coordinator accompanied me at every step.”',
-          cite: 'Faisal A. · Riyadh',
+          quote:
+            '“Thank God, I’m really so happy—there’s definitely a huge difference!”',
+          cite: 'Reem',
+        },
+        {
+          quote: '“Soo nice and beautiful photo..”',
+          cite: 'Tawfik',
+        },
+        {
+          quote: '“Good afternoon, I’m doing great; here is a photo for you.”',
+          cite: 'Nickola',
         },
       ],
     },
@@ -736,16 +748,27 @@ const TRANSLATIONS = {
       heading: 'آراء المرضى',
       items: [
         {
-          quote: '«تصميم الابتسامة الرقمي يبدو طبيعياً تماماً.»',
-          cite: 'ماركوس هـ. · ميونخ',
+          quote:
+            '«باقة شكر لشركة إستيلوكس EsteLux وللأخت منار بالأخص على حسن الاستقبال والحفاوة. من وصولي للمطار للمستشفى وقبل العملية وبعد العملية ما قصرت وفرت كل جهدها ووقتها معاي. وقبل المغادرة بيوم قررت أسوي أسناني تبييض، صراحة تجربة وما كنت متوقع هالنتيجة روعة وحيل أعجبوني أسناني عن قبل. وبالنهاية إذا تلف إسطنبول ما راح تحصل ثقة أكثر منهم من مستشفى ومن كادر طبي وأطباء استشاريين.»',
+          cite: 'زيد',
+          featured: true,
         },
         {
-          quote: '«كان التنسيق ممتازاً.»',
-          cite: 'كيارا د. · دبلن',
+          quote:
+            '«فريقكم قام بعمل رائع. تلقّيت الكثير من الإطراءات على ابتسامتي الجميلة، ولا يمكن أن أكون أسعد من ذلك.»',
+          cite: 'داري',
         },
         {
-          quote: '«رافقني المنسّق الناطق بالعربية في كل خطوة.»',
-          cite: 'فيصل أ. · الرياض',
+          quote: '«آه الحمد لله كتير مبسوطة والله، فرق طبعاً، الحمد لله.»',
+          cite: 'ريم',
+        },
+        {
+          quote: '«صورة جميلة ورائعة جداً..»',
+          cite: 'توفيق',
+        },
+        {
+          quote: '«مساء الخير، أنا بحالة رائعة؛ وهذه صورة لنتيجة زراعة الشعر.»',
+          cite: 'نيكولا',
         },
       ],
     },
@@ -3365,7 +3388,9 @@ export function App() {
               {t.reviews.items.map((rev) => (
                 <blockquote
                   key={rev.cite}
-                  className="luxury-card-hover flex flex-col gap-5 bg-white border border-[#EADBD3] rounded-2xl p-7"
+                  className={`luxury-card-hover flex flex-col gap-5 bg-white border border-[#EADBD3] rounded-2xl p-7 ${
+                    'featured' in rev && rev.featured ? 'md:col-span-2' : ''
+                  }`}
                 >
                   <div className="flex items-center justify-between">
                     <Quote className="w-8 h-8 text-[#B27262]/40 rtl:-scale-x-100" />
